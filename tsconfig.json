@@ -1,0 +1,80 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": false,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env"
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+
+
+//{
+//  "compilerOptions": {
+//    "module": "ESNext", //import 方式
+//    "target":"ESNext",  //  指定输出 js的标准是哪个版本
+//    "moduleResolution": "node",
+//    "strict": false,
+//    "jsx": "preserve",
+//    "importHelpers": true,
+//    "experimentalDecorators": true,
+//    "esModuleInterop": true, //可以使用 ES6模块的导入语法
+//    "allowSyntheticDefaultImports": true,
+//    "suppressImplicitAnyIndexErrors": true,
+//    "sourceMap": true,
+//    "baseUrl": ".",
+//    "types": [
+//      "webpack-env"
+//    ],
+//    "paths": {
+//      "@/*": [
+//        "src/*"
+//      ]
+//    },
+//    "lib": [
+//      "ESNext",
+//      "DOM",
+//      "DOM.Iterable",
+//    ]
+//  },
+//  "include": [
+//    "src/**/*.ts",
+//    "src/**/*.tsx",
+//    "src/**/*.vue",
+//  ],
+//  "exclude": [
+//    "node_modules"
+//  ]
+//}

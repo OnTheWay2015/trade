@@ -1,0 +1,44 @@
+{
+  "scripts": {
+    "debug1": "webpack --mode=development  --display-modules --config webpack.dev.js"
+    ,"release1": "webpack --mode=production --display-modules --config webpack.prod.js"
+    ,"debug":"node build/build.js ../webpack.dev.js"
+    ,"release":"node build/build.js ../webpack.prod.js"
+  },
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/echarts": "^4.6.5",
+    "axios": "^0.20.0",
+    "core-js": "^3.6.5",
+    "echarts": "^4.9.0",
+    "element-ui": "^2.13.2",
+    "tslib": "^2.0.1",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.2",
+    "vuex": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/webpack-env": "^1.15.2",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-typescript": "^4.5.6",
+    "@vue/cli-plugin-vuex": "^4.5.6",
+    "css-loader": "^4.3.0",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-plugin": "^4.5.0",
+    "mini-css-extract-plugin": "^0.11.2",
+    "node-sass": "^4.14.1",
+    "sass": "^1.26.11",
+    "sass-loader": "^10.0.2",
+    "ts-loader": "^8.0.3",
+    "typescript": "^4.0.2",
+    "url-loader": "^4.1.0",
+    "vue-loader": "^15.9.3",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.44.1",
+    "webpack-bundle-analyzer": "^3.9.0",
+    "webpack-chain": "^6.5.1",
+    "webpack-cli": "^3.3.12"
+  }
+}

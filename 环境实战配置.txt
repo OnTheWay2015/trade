@@ -1,0 +1,49 @@
+webpack脚手架
+创建完毕后，我们首先安装webpack相关依赖：
+
+-------------
+webpack（webpack框架）
+cnpm install -D webpack
+-------------
+webpack-cli（webpack脚手架）
+cnpm install -D webpack-cli
+-------------
+
+webpack-chain（webpack链式配置,可不用）
+ cnpm install -D webpack-chain
+-------------
+
+webpack脚手架相关的依赖我们算是安装完了，
+然后我们在工程根目录底下创建一个 webpack配置文件 webpack.config.js，用webpack-chain导出一个配置：
+
+	const config = new (require("webpack-chain"))();
+	module.exports = config.toConfig();
+	
+-------------	
+typescript
+因为我们需求中需要支持ts，所以我们继续安装ts相关依赖：
+
+typescript（ts脚手架）
+
+cnpm install -D typescript
+-------------
+ts-loader（ts加载器）
+
+ cnpm install -D ts-loader
+-------------
+ 
+cnpm install  -D @types/webpack-env
+This package contains type definitions for webpack (module API) (https://github.com/webpack/webpack).
+-------------
+1. vscode 要安装 vue 插件
+2. 把 shims-vue.d.ts , shims-tsx.d.ts 两个文件拷到src目录下面.这样工程里可以直接引用 .vue 模板文件
+
+-------------
+//https://www.cnblogs.com/xym0996/p/12264737.html
+cnpm i vue-loader -D;//解析转化.vue文件，
+cnpm i vue-style-loader -D
+cnpm i vue-template-compiler -D //将vue-loader提取出的html模板编译成js代码;
+
+cnpm i vue -S
+-------------
+
