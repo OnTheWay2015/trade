@@ -103,4 +103,39 @@ import { WebHttpRequest } from './web/WebHttpRequest';
             request.send(data);
         }
 
+       export async function asyncGet(url: string): Promise<any> {
+            return _asyncRequest(url,HttpMethod.GET, HttpResponseType.TEXT,null);
+       }
+       export async function asyncPost(url: string,data:string): Promise<any> {
+            return _asyncRequest(url,HttpMethod.GET, HttpResponseType.TEXT,data);
+       }
+       async function _asyncRequest(url: string,method:string, type:string, postdata:string): Promise<any> {
+           var promise = new Promise<any>(resolve => {
+               //http.get(url, res => {
+               //    resolve(res);
+               //});
+               let request = new WebHttpRequest();
+               request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+               //request.responseType = HttpResponseType.TEXT;
+               //request.responseType = "text";
+               request.responseType = type;
+               request.open(url, method);
+               request.addEventListener(Event.COMPLETE, function (e: Event) {
+                   let req = <WebHttpRequest>e.currentTarget;
+                   let data = JSON.parse(req.response);
+                   //cb.call(target, data);
+                   resolve(data);
+               }, this);
+
+               request.addEventListener(Event.IO_ERROR, function (e) {
+                   //cb.call(target, e);
+                   console.error(e);
+                   resolve(null);
+               }, this);
+               request.send(postdata);
+           });
+
+           return promise;
+       }
+
     }

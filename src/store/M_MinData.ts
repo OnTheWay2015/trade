@@ -3,6 +3,7 @@ import ax from "axios"
 import { API_MIN_DATA, API_TICK_DATA, HTTP_SERVER } from '@/util/configs';
 import g_H_fmt_echarts from '@/util/H_fmt_echarts';
 import { paramsUrlFMT } from '@/util/utils';
+import { http } from '@/net/httpHandle';
 
 
 
@@ -51,9 +52,10 @@ export class M_Mindata extends EventDispatcher
         let args = paramsUrlFMT(["contract_id","date_start","date_stop","data_min"],[id,date_st,date_ed,timeCount]);
 
         ax.defaults.baseURL = HTTP_SERVER;
-        var info = await ax.get(API_MIN_DATA + args);
+        //var info = await ax.get(API_MIN_DATA + args);
+        var info = await http.asyncGet(HTTP_SERVER+API_MIN_DATA + args);
         
-        let fmt_data = self.formatForEchart(info.data);
+        let fmt_data = self.formatForEchart(info);
         let opdata = g_H_fmt_echarts.reset()
             .setTitle("trade_data") 
             .setCategoryData(fmt_data.categoryData)

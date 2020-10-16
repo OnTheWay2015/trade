@@ -93,19 +93,26 @@ import Event from '../event';
         /**
          * @private
          */
-        private _responseType: "" | "arraybuffer" | "blob" | "document" | "json" | "text";
+        //private _responseType: "" | "arraybuffer" | "blob" | "document" | "json" | "text";
+        private _responseType:string;
 
         /**
          * @private
          * 设置返回的数据格式，请使用 HttpResponseType 里定义的枚举值。设置非法的值或不设置，都将使用HttpResponseType.TEXT。
          */
-        public get responseType(): "" | "arraybuffer" | "blob" | "document" | "json" | "text" {
+        //public get responseType(): "" | "arraybuffer" | "blob" | "document" | "json" | "text" {
+        //    return this._responseType;
+        //}
+        public get responseType():string {
             return this._responseType;
         }
 
-        public set responseType(value: "" | "arraybuffer" | "blob" | "document" | "json" | "text") {
+        public set responseType(value:string){
             this._responseType = value;
         }
+        //public set responseType(value: "" | "arraybuffer" | "blob" | "document" | "json" | "text") {
+        //    this._responseType = value;
+        //}
 
         /**
          * @private

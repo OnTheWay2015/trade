@@ -143,4 +143,4 @@ let main = () => {
   com.$mount("#app");
 };
 
-//main();
+main();
