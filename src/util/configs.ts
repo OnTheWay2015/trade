@@ -17,3 +17,11 @@ export const TIME_UNIT_HOUR:number= 2;
 export const TIME_UNIT_DAY:number= 3;
 
 export default configs;
+
+
+export enum pack_id{
+e_mst_cg2cg_start=444
+,e_mst_w2c_player_connect_result
+,e_mst_g2c_heartbeat
+
+};
