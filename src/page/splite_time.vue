@@ -133,6 +133,7 @@ import { Component,Prop, Vue } from 'vue-property-decorator';
 import event_key from '@/util/event_key'
 import configs, { TIME_UNIT_DAY, TIME_UNIT_HOUR, TIME_UNIT_MIN } from '@/util/configs'
 import { dateFMT} from '@/util/utils';
+import g_ui from '@/UIMain';
 
 @Component
 export default class RootShow extends Vue {
@@ -213,14 +214,16 @@ export default class RootShow extends Vue {
       let ed_str = dateFMT(self.date_value_ed,"yy-MM-dd"); 
       let tmst_str = dateFMT(self.time_value_st," hh:mm:ss"); 
       let tmed_str = dateFMT(self.time_value_ed," hh:mm:ss"); 
-      (vm as Vue).$emit(event_key.UIACT_MIN_DATA_SET_PARAMS, {
+      //(vm as Vue).$emit(event_key.UIACT_MIN_DATA_SET_PARAMS, {
+      g_ui.dispatch(event_key.UIACT_MIN_DATA_SET_PARAMS, {
         id:self.contractID,
         date_st: st_str+tmst_str,
         date_ed: ed_str+tmed_str,
         timeCount:self.input_num,
         timeType:self.select_unit_value
       } ); 
-      (vm as Vue).$emit(event_key.UIACT_MIN_DATA_SHOW, null);
+      //(vm as Vue).$emit(event_key.UIACT_MIN_DATA_SHOW, null);
+      g_ui.dispatch(event_key.UIACT_MIN_DATA_SHOW, null);
     }
 
 

@@ -28,7 +28,7 @@ const PROJ_DIR = __dirname +"/../" //__dirname, js 文件所在目录.
 
 console.log("PROJ_DIR =>" +PROJ_DIR );
 
-let d_flag = false;
+let d_flag = true;
 let html_op = (marks)=>{
     if (DEV_FLAG)
     {
@@ -72,6 +72,7 @@ let html_op = (marks)=>{
 
 
 let func_copy = () => {
+    if (d_flag) console.log("func_copy act");
     var copycount = 0;
     var copyfiles = [
         [
@@ -126,6 +127,7 @@ let func_copy = () => {
                             if (d_flag) console.log("copy end");
                             if (d_flag) console.log(markMd5);
                             html_op(markMd5);
+                            copylibs(); 
                         }
                     })
                     .catch(err => {
@@ -149,17 +151,20 @@ let func_copy = () => {
 //func_copy();
 
 let pack = () => {
+    if (d_flag) console.log("pack act");
     //if (d_flag) console.log(ccc);
     const compiler = webpack(ccc);
     compiler.run( (err, stats) => {
        if(err || stats.hasErrors()) {
         // 构建过程出错
+            console.log("---------------------------- err:");
             console.log(err);
+            console.log("---------------------------- stats:");
+            console.log(stats.toString());
         } else {
-            //if (d_flag) console.log(stats);
+            console.log(stats.toString());
             console.log("cost_time["+(stats.endTime-stats.startTime)/1000+"]");
             func_copy();
-            copylibs(); 
         };
     });
 }
@@ -167,6 +172,7 @@ pack();
 
 
 var copylibs = () => {
+    if (d_flag) console.log("copylibs act");
     const { exec, execFile } = require('child_process');
     execFile(
         "c.bat",

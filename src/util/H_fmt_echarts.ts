@@ -1,8 +1,10 @@
+import { deepClone } from './utils';
+
 enum series_tp{
     CANDLESTICK ="CANDLESTICK"
     ,LINE="LINE"
 }
-export class H_fmt_echarts 
+export default class H_fmt_echarts 
 {
 
     constructor() {
@@ -17,9 +19,10 @@ export class H_fmt_echarts
     }
    
 //-----------
-    private _showcount:number = 20;
+    private _showcount_def:number = 500;
     private _showST_def:number = 0;
-    private _showEd_def:number = 3;
+    private _showEd_def:number = 5;
+    private _showEd:number = 5;
 
 //-----------
     private _title:any;
@@ -27,10 +30,12 @@ export class H_fmt_echarts
     private _categoryData:any
     private _legendNames:string[]=[];
     
-    private upColor = '#ec0000';
-    private upBorderColor = '#8A0000';
-    private downColor = '#00da3c';
-    private downBorderColor = '#008F28';
+
+
+    private upColor = '#FD1050';
+    private upBorderColor = '#FD1050';
+    private downColor = '#0CF49B';
+    private downBorderColor = '#0CF49B';
     public setCategoryData(v:any)
     {
         this._categoryData= v;
@@ -48,8 +53,9 @@ export class H_fmt_echarts
         {
             return;
         }
+
         let self = this;
-        self._showEd_def = self._showcount/v.length;
+        self._showEd=self._showEd_def/(v.length/self._showcount_def);
         this.addvalues(series_tp.LINE, v, ops);
         return this;
     }
@@ -58,7 +64,7 @@ export class H_fmt_echarts
        this._title = s;
         return this;
     }
-    private addvalues(tp:series_tp,v:any,ops:any)
+    private addvalues(tp:series_tp,v:any,ops:{dataraw?:any,markpoints?:any,marklines?:any})
     {
         this._values.push({
             tp:tp
@@ -124,7 +130,7 @@ export class H_fmt_echarts
     }
     
 
-    private getSeriesNode(tp:series_tp,v:any,ops:any) {
+    private getSeriesNode(tp:series_tp,v:any,ops:{dataraw?:any,markpoints?:any,marklines?:any}) {
         let self = this;
         let data =null;
         switch (tp)
@@ -141,12 +147,23 @@ export class H_fmt_echarts
                 }; 
             break;
             case series_tp.CANDLESTICK: 
+            //let vclone:any ={};
+            //deepClone(v,vclone);
             data = {
                 type: 'candlestick',
+                animation: false,
                 name:  ops["name"]? ops["name"]:'k-name',
                 data: v,
                 itemStyle: self.getItemStyle(),
             }; 
+            if (ops.marklines)
+            {
+                data.markLine = self.getMarkLines(ops.dataraw,ops.marklines); 
+            }
+            if (ops.markpoints)
+            {
+                data.markPoint = self.getMarkPoints(ops.dataraw,ops.markpoints); 
+            }
             break;
         }
         if (!data)
@@ -280,7 +297,7 @@ export class H_fmt_echarts
         return [{
             rangeMode: ['percent', 'percent'],
             start: self._showST_def,
-            end: self._showEd_def,
+            end: self._showEd,
             textStyle: {
                 color: '#8392A5'
             },
@@ -306,6 +323,177 @@ export class H_fmt_echarts
         }];
     }
 
+
+    /* 
+     markPoint: {
+                label: {
+                    normal: {
+                        formatter: function (param) {
+                            return param != null ? Math.round(param.value) : '';
+                        }
+                    }
+                },
+                
+                data: [
+                    {
+                        name: 'XX标点',
+                        coord: ['2013/5/31', 2300],
+                        value: 2300,
+                        itemStyle: {
+                            color: 'rgb(41,60,85)'
+                        }
+                    },
+                    {
+                        name: 'highest value',
+                        type: 'max',
+                        valueDim: 'highest'
+                    },
+                    {
+                        name: 'lowest value',
+                        type: 'min',
+                        valueDim: 'lowest'
+                    },
+                    {
+                        name: 'average value on close',
+                        type: 'average',
+                        valueDim: 'close'
+                    }
+                ]
+            },
+            markLine: {
+                data: [
+                    [
+                        {
+                            name: 'from lowest to highest',
+                            type: 'min',
+                            valueDim: 'lowest',
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            label: {
+                                show: false
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        },
+                        {
+                            type: 'max',
+                            valueDim: 'highest',
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            label: {
+                                show: false
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        name: 'min line on close',
+                        type: 'min',
+                        valueDim: 'close'
+                    },
+                    {
+                        name: 'max line on close',
+                        type: 'max',
+                        valueDim: 'close'
+                    }
+                ]
+            }
+    
+    */
+    private getMarkLines(kvalues:any,markidxs:any) {
+        //mark  {下标1, 下标2,标识数据块哪个属性}
+        let values = []; 
+        for (let i=0;i<markidxs.length;i++)
+        {
+            let mark = markidxs[i];
+            let v1 = kvalues[mark.idx1];
+            let v2 = kvalues[mark.idx2];
+            let valueidx1 = mark.valueidx1;
+            let valueidx2 = mark.valueidx2?mark.valueidx2:valueidx1;
+            values.push(
+               [
+
+                        {
+                            name: 'from lowest to highest',
+                            type: 'min',
+                coord: [v1[0], v1[valueidx1]],
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            label: {
+                                show: false
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        },
+                        {
+                            type: 'max',
+                            coord: [v2[0], v2[valueidx2]],
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            label: {
+                                show: false
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        }
+
+               ] 
+            );
+        } 
+        let fmt = {
+                symbol: ['none', 'none'],
+                data:values
+        };
+        return fmt;
+    }
+    private getMarkPoints(kvalues:any,markidxs:any) {
+        //mark  {下标,标识数据块哪个属性}
+        let values = []; 
+        for (let i=0;i<markidxs.length;i++)
+        {
+            let mark = markidxs[i];
+            let v = kvalues[mark.idx];
+            values.push({
+                name: v[0] + ' 标点',
+                coord: [v[0], v[mark.valueidx]],
+                value: v[mark.valueidx],
+                itemStyle: {
+                    color: 'rgb(41,60,85)'
+                }
+            });
+        } 
+        //{
+        //    name: 'XX标点',
+        //        coord: ['2013/5/31', 2300],
+        //            value: 2300,
+        //                itemStyle: {
+        //        color: 'rgb(41,60,85)'
+        //    }
+        //},
+        
+        let fmt = {
+                label: {
+                    normal: {
+                        formatter: function (param) {
+                            return param != null ? Math.round(param.value) : '';
+                        }
+                    }
+                },
+                data:values
+        };
+        return fmt;
+    }
 }
-let g_H_fmt_echarts:H_fmt_echarts= new H_fmt_echarts();
-export default g_H_fmt_echarts; 

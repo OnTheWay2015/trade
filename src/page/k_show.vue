@@ -15,25 +15,25 @@ import event_key from '../util/event_key'
 import dconf from '../store/echarts_config';
 
 import echarts from 'echarts'
+import g_ui from '@/UIMain';
 
 @Component
 export default class k_show extends Vue {
   private myChart!:any;
   private _init_():void{
       let self = this;
-        let vm:any= self.$root; 
-        (vm as Vue).$on(event_key.UI_RESIZE, self.onResize.bind(self) ); 
-        (vm as Vue).$on(event_key.UI_ECHARTS_DATA_SHOW, self.onEchartsShow.bind(self) ); 
-        (vm as Vue).$on(event_key.UI_ECHARTS_DATA_UPDATE, self.onEchartsUpdate.bind(self) ); 
+        g_ui.addEventListener(event_key.UI_RESIZE, self.onResize.bind(self),self); 
+        g_ui.addEventListener(event_key.UI_ECHARTS_DATA_SHOW, self.onEchartsShow.bind(self),self ); 
+        g_ui.addEventListener(event_key.UI_ECHARTS_DATA_UPDATE, self.onEchartsUpdate.bind(self),self ); 
         //self.myChart.setOption(dconf);
   }
   private mounted():void {
     console.log("k_show.vue mounted");
     this._init_();
   }
-  private onResize(data:any)
+  private onResize(evt:any)
   {
-    this._onResize(data);
+    this._onResize(evt.data);
   }
   private _onResize(data?:any)
   {
@@ -49,12 +49,7 @@ export default class k_show extends Vue {
         self.myChart = echarts.init(ele);
 
         //https://echarts.apache.org/zh/api.html#events
-        self.myChart.on('click', function(params) {
-		      console.log(params)
-		      if(params.componentType=="series"){
-          
-		      	}
-		      });
+        self.myChart.on('click', self.onEleClick, self); 
         self.myChart.setOption(def_option_more);
         self.myChart.clear();
     }
@@ -64,12 +59,22 @@ export default class k_show extends Vue {
           ,height:h});
 
   }
-  private onEchartsShow(data:any):void {
+  private onEchartsShow(evt:any):void {
     this.myChart.clear();
-    this.myChart.setOption(data);
+    this.myChart.setOption(evt.data);
   }
-  private onEchartsUpdate(data:any):void {
-    this.myChart.setOption(data);
+  private onEchartsUpdate(evt:any):void {
+    this.myChart.setOption(evt.data);
+  }
+
+  private onEleClick(params:any)
+  {// params.value为数组,第一个值为数据在总数据数组中的下标
+	  console.log(params)
+	  if(params.componentType!="series"){
+      return;
+    }
+    g_ui.dispatch(event_key.UI_ACT_SEL_POINT,params.value[0]); 
+
   }
 
 }

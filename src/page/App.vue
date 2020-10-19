@@ -49,6 +49,7 @@ import c_k_show from '@/page/k_show.vue';
 import c_splite_time from '@/page/splite_time.vue';
 //import c_user_show from 'user_show.vue';
 import event_key from '../util/event_key'
+import g_ui from '@/UIMain';
 
 @Component({
   components: {
@@ -66,8 +67,9 @@ export default class App extends Vue {
   private showKFlag:boolean = true;
   private _init_():void{
     let self = this;
-        let vm:any= self.$root; 
-        (vm as Vue).$on(event_key.UI_RESIZE, self.onResize.bind(self) ); 
+        //let vm:any= self.$root; 
+        //(vm as Vue).$on(event_key.UI_RESIZE, self.onResize.bind(self) ); 
+        g_ui.addEventListener(event_key.UI_RESIZE, self.onResize.bind(self),self); 
   }
   private mounted():void {
     console.log("App.vue mounted");

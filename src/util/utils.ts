@@ -15,7 +15,22 @@ export function error(str:string){
     console.error(str);
 }
 
-
+export function deepClone(origin, target){
+    var target = target || {},
+    toStr = Object.prototype.toString,
+    arrStr = "[object Array]";
+    for(var prop in origin){
+        if(origin.hasOwnProperty(prop)){
+            if(origin[prop] !== "null" && typeof(origin[prop]) == "object")
+            {
+                target[prop] = (toStr.call(origin[prop]) == arrStr) ? [] : {};                    
+                deepClone(origin[prop],target[prop]);
+        　　}else{
+            　　target[prop] = origin[prop];
+        　　}
+        }
+    }
+} 
 //--------------------------------
 export class urlST{
     public isHttps:boolean = false;

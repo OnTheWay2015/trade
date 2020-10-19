@@ -3,7 +3,7 @@
 const path = require("path");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 var  VueLoaderPlugin = require('vue-loader/lib/plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin')
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 //清除输出目录，免得每次手动删除
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');

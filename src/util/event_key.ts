@@ -1,5 +1,16 @@
 enum event_key  {
-    LG_="LG_" //send logic 
+    //DATA_="DATA_" //send data 
+    DATA_ACT_="DATA_ACT_" //data send out
+    //------------------
+   
+    ,DATA_ACT_ADD_POINT = "DATA_ACT_ADD_POINT "
+    ,DATA_ACT_ADD_LINE= "DATA_ACT_ADD_LINE"
+    ,DATA_ACT_SEL_LINE_FLAG= "DATA_ACT_SEL_LINE_FLAG"
+    
+    ,DATA_ACT_DEL_POINT = "DATA_ACT_DEL_POINT "
+    ,DATA_ACT_DEL_LINE= "DATA_ACT_DEL_LINE"
+    //------------------
+    ,LG_="LG_" //send logic 
     ,LGACT_="LGACT_" //logic send out
    
     //------------------
@@ -27,6 +38,14 @@ enum event_key  {
     ,UIACT_MIN_DATA_SET_PARAMS="UIACT_MIN_DATA_SET_PARAMS" 
     ,UIACT_MIN_DATA_SHOW="UIACT_MIN_DATA_SHOW" 
 
+
+
+    ,UI_ACT_SEL_POINT = "UI_ACT_ADD_POINT "
+    ,UI_ACT_ADD_LINE= "UI_ACT_ADD_LINE"
+    ,UI_ACT_SEL_LINE_FLAG= "UI_ACT_SEL_LINE_FLAG"
+    
+    //,UI_ACT_DEL_POINT = "UI_ACT_DEL_POINT "
+    ,UI_ACT_DEL_LINE= "UI_ACT_DEL_LINE"
     //------------------
 
 };

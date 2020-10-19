@@ -1,10 +1,11 @@
 import  LogicBase from "./logicBase"
 import  g_tickdata from "../store/M_Tickdata"
 import event_key from '@/util/event_key';
+import LogicMain from '@/logicMain';
 export default class LogicTick extends LogicBase 
 {
-    constructor(){
-        super();
+    constructor(m:LogicMain){
+        super(m);
     }
 
     public async getData():Promise<any>

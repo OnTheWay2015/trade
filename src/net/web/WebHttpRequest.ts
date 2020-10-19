@@ -183,7 +183,7 @@ import Event from '../event';
          */
         public send(data?: any): void {
             if (this._responseType != null) {
-                this._xhr.responseType = this._responseType;
+                this._xhr.responseType = <XMLHttpRequestResponseType>this._responseType;
             }
             if (this._withCredentials != null) {
                 this._xhr.withCredentials = this._withCredentials;

@@ -2,7 +2,6 @@ import EventDispatcher from "../util/eventdispatch"
 import echarts_cfg from './echarts_config';
 import ax from "axios"
 import { API_TICK_DATA, HTTP_SERVER } from '@/util/configs';
-import g_H_fmt_echarts, { H_fmt_echarts } from '@/util/H_fmt_echarts';
 import { dateFMT } from '@/util/utils';
 
 
@@ -77,15 +76,16 @@ export class M_Tickdata extends EventDispatcher
                 ]
             })
 
-        let opdata = g_H_fmt_echarts.reset()
-            .setCategoryData(fmt_data.categoryData)
-            .setTitle("tick_data") 
-            //.setValuesCandlestick(fmt_data.values,{name:"日k"})
-            .setValuesAddLine(fmt_data.linevalues,{name:"tickLine"})
-            .getOptions();
+        //let opdata = g_H_fmt_echarts.reset()
+        //    .setCategoryData(fmt_data.categoryData)
+        //    .setTitle("tick_data") 
+        //    //.setValuesCandlestick(fmt_data.values,{name:"日k"})
+        //    .setValuesAddLine(fmt_data.linevalues,{name:"tickLine"})
+        //    .getOptions();
 
-        console.log("logictick getdata!");
-        return opdata;
+        //console.log("logictick getdata!");
+        //return opdata;
+        return null;
     }
 
     private formatForEchart(d: any): any {

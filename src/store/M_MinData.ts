@@ -1,9 +1,10 @@
 import EventDispatcher from "../util/eventdispatch"
 import ax from "axios"
-import { API_MIN_DATA, API_TICK_DATA, HTTP_SERVER } from '@/util/configs';
-import g_H_fmt_echarts from '@/util/H_fmt_echarts';
+import { API_MIN_DATA, API_TICK_DATA, END_PRICE_IDX, HTTP_SERVER } from '@/util/configs';
 import { paramsUrlFMT } from '@/util/utils';
 import { http } from '@/net/httpHandle';
+import  H_fmt_echarts  from '@/util/H_fmt_echarts';
+import event_key from '@/util/event_key';
 
 
 
@@ -12,7 +13,8 @@ export class M_Mindata extends EventDispatcher
     constructor() {
         super();
     }
-    private _data:any;
+    private _data:{datafmt:any,dataraw:any,datarawMap:any,marklines:any[],markpoints:any[]};
+    private _h_fmt:H_fmt_echarts;
     public getDataByStartTime(k: string): any {
         let self = this;
         if (self._data[k]) {
@@ -21,7 +23,6 @@ export class M_Mindata extends EventDispatcher
         return null;
     }
 
-    private END_PRICE_IDX = 1;
     private calculateMA(dayCount, data) {
         let self = this;
         var result = [];
@@ -32,11 +33,61 @@ export class M_Mindata extends EventDispatcher
             }
             var sum = 0;
             for (var j = 0; j < dayCount; j++) {
-                sum += data[i - j][self.END_PRICE_IDX];
+                sum += data[i - j][END_PRICE_IDX];
             }
             result.push(sum / dayCount);
         }
         return result;
+    }
+
+    public getShowData()
+    {
+        let self = this;
+        let fmt_data = self._data.datafmt;
+        self._h_fmt.reset(); 
+        let opdata = self._h_fmt 
+            .setTitle("trade_data") 
+            .setCategoryData(fmt_data.categoryData)
+            .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
+            .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
+            .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
+            .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
+            .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
+            .getOptions();
+
+        return opdata;
+    }
+
+    public getMarkPoint(idx:number)
+    {
+        let self = this;
+        let data = self._data.markpoints;
+        for (let i = data.length - 1; i >= 0; i--) {
+            if (idx == data[i].idx) {
+                return data[i];
+            }
+        }
+        return null;
+    }
+    public getKeyByidx(idx:number)
+    {
+        let self = this;
+        let data = self._data.dataraw;
+        if (idx<data.length)
+        {
+            return data[idx][0];
+        }
+        return null;
+    }
+    public getPerData(dateStr:string)
+    {
+        let self = this;
+        let data = self._data.datarawMap;
+        if (data[dateStr])
+        {
+            return data[dateStr];
+        }
+        return null;
     }
 
     public async getData(id:string,date_st:string,date_ed:string,timeCount:number): Promise<any> {
@@ -54,65 +105,51 @@ export class M_Mindata extends EventDispatcher
         ax.defaults.baseURL = HTTP_SERVER;
         //var info = await ax.get(API_MIN_DATA + args);
         var info = await http.asyncGet(HTTP_SERVER+API_MIN_DATA + args);
-        
-        let fmt_data = self.formatForEchart(info);
-        let opdata = g_H_fmt_echarts.reset()
+       
+        self._h_fmt = new H_fmt_echarts();
+        let fmt_data = self.formatData(info);
+        let opdata = self._h_fmt 
             .setTitle("trade_data") 
             .setCategoryData(fmt_data.categoryData)
-            .setValuesCandlestick(fmt_data.values,{name:"d-k"})
-            //.setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
-            //.setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
-            //.setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
-            //.setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
-            //.setValuesAddLine(fmt_data.linevalues,{name:"tickLine"})
-            .getOptions();
-
-        console.log("logicmindata getdata!");
-        return opdata;
-    }
-    public async getData_old(): Promise<any> {
-        let self = this;
-        ax.defaults.baseURL = HTTP_SERVER;
-        var info = await ax.get(API_MIN_DATA);
-        
-        let fmt_data = self.formatForEchart(info.data);
-        let opdata = g_H_fmt_echarts.reset()
-            .setTitle("min_data") 
-            .setCategoryData(fmt_data.categoryData)
-            .setValuesCandlestick(fmt_data.values,{name:"日k"})
-            //.setValuesAddLine(fmt_data.linevalues,{name:"tickLine"})
+            .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
+            .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
+            .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
+            .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
+            .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
             .getOptions();
 
         console.log("logicmindata getdata!");
         return opdata;
     }
 
-    private formatForEchart(d: any): any {
+    private formatData(d: any): any {
         let self =this;
-        var categoryData = [];
-        var values = [];
-        var linevalues = [];
-        self._data = {};
+        let categoryData = [];
+        let values = [];
+        let linevalues = [];
+
+        let datarawmap = {};
+        let datafmt = {};
         let arr = d.trade_list;
-        for (var i = 0; i < arr.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
             let n: any = arr[i];//开始价格，结束价格，最高价，最低价，最大价差。新增成交量，成交金额。平均价
             //categoryData.push(n.actionday + " " + n.starttime);
             categoryData.push(n[0]);
-            linevalues.push(n[self.END_PRICE_IDX]);
+            linevalues.push(n[END_PRICE_IDX]);
             values.push([
-                n[1]
-                , n[2]
-                , n[3]
-                , n[4]
+                n[1]    //start_price
+                , n[2] //end_price
+                , n[3] //hight_price
+                , n[4] //low_price
             ]);
             //self._data[n[0]] = n;
-            self._data[n[0]] = n;
+            datarawmap[n[0]] = {v:n,idx:i};
         }
         let linevalues_5d = self.calculateMA(5,arr); 
         let linevalues_10d = self.calculateMA(10,arr); 
         let linevalues_20d = self.calculateMA(20,arr); 
         let linevalues_30d = self.calculateMA(30,arr); 
-        return {
+        datafmt = {
             categoryData: categoryData,
             values: values,
             linevalues_5d  :linevalues_5d ,
@@ -121,30 +158,70 @@ export class M_Mindata extends EventDispatcher
             linevalues_30d :linevalues_30d ,
             linevalues: linevalues
         };
+        //let marklines:any[] = [];
+        //let markpoints:any[] = [];
+        let markpoints = [
+        //mark  {下标,标识数据块哪个属性}                
+           {idx:5, valueidx:1} ,
+           {idx:10, valueidx:1} ,
+           {idx:20, valueidx:1} ,
+
+        ];
+        let marklines= [
+        //mark  {下标1, 下标2,标识数据块哪个属性}
+           {idx1:4,idx2:10,valueidx1:1} 
+           ,{idx1:24,idx2:30,valueidx1:1,valueidx2:1} 
+        ];
+        self._data = {datafmt:datafmt,dataraw:arr,datarawMap:datarawmap,markpoints:markpoints,marklines:marklines};
+        return datafmt;
     }
-    private formatForEchart_old(d: any): any {
-        let self =this;
-        var categoryData = [];
-        var values = [];
-        var linevalues = [];
-        self._data = {};
-        for (var i = 0; i < d.msg.length; i++) {
-            let n: any = d.msg[i];
-            categoryData.push(n.actionday + " " + n.starttime);
-            linevalues.push(n.endprice);
-            values.push([
-                n.startprice
-                , n.endprice
-                , n.lowprice
-                , n.highprice
-            ]);
-            self._data[n.StartTime] = n;
-        }
-        return {
-            categoryData: categoryData,
-            values: values,
-            linevalues: linevalues
-        };
+
+    //
+    public addPoint(idx:number,valueidx:number)
+    {
+       let self = this;
+       self._data.markpoints.push({idx:idx,valueidx:valueidx}); 
+        self.dispatch(event_key.DATA_ACT_ADD_POINT,null);
+    }
+    public delPoint(idx:number)
+    {
+       let self = this;
+       let arr = self._data.markpoints;
+       for (let i=arr.length-1;i>=0;i--)
+       {
+            if (arr[i].idx == idx)
+            {
+                arr.splice(i,1);
+                break;
+            }
+       }
+       self.dispatch(event_key.DATA_ACT_DEL_POINT,null);
+    }
+
+    public addLine(idx1:number,valueidx1:number,idx2:number,valueidx2:number)
+    {
+       let self = this;
+       self._data.marklines.push({
+           idx1:idx1,
+           valueidx1:valueidx1,
+           idx2:idx2,
+           valueidx2:valueidx2
+        }); 
+        self.dispatch(event_key.DATA_ACT_ADD_LINE,null);
+    }
+    public delLine(idx1:number,idx2:number)
+    {
+       let self = this;
+       let arr = self._data.marklines;
+       for (let i=arr.length-1;i>=0;i--)
+       {
+            if (arr[i].idx1 == idx1 && arr[i].idx2==idx2)
+            {
+                arr.splice(i,1);
+                break;
+            }
+       }
+        self.dispatch(event_key.DATA_ACT_DEL_LINE,null);
     }
 
 }

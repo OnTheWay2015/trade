@@ -24,7 +24,6 @@
 
 
 #r_top { 
-    display:inline-block;
     height:10vh;
     width: 100%; 
     background-color:#21202D; 
@@ -32,6 +31,7 @@
 #r_midcav{
     height:80vh;
     width: 100%; 
+    background-color:#21202D; 
     }
 #r_foot {
     height:10vh;
