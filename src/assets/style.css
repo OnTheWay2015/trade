@@ -6,6 +6,13 @@
 }
 
 
+.white {
+    background-color:#fff; 
+}
+.red {
+    background-color:red; 
+}
+
 .left_float{
     float:left;
 }
@@ -42,12 +49,12 @@
 
 #r_left {
     height:100%;
-    width: 10%; 
+    width: 20%; 
     background-color:#21202D; 
     }
 #r_center {
     height:100%;
-    width: 80%; 
+    width: 70%; 
     background-color:#21202D; 
     } 
 #r_right {
@@ -108,7 +115,7 @@
     }
   }*/
 .el-row {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 .el-row.last-child {
     margin-bottom: 0;

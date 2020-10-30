@@ -16,6 +16,7 @@ import dconf from '../store/echarts_config';
 
 import echarts from 'echarts'
 import g_ui from '@/UIMain';
+import g_main from '@/logicMain';
 
 @Component
 export default class k_show extends Vue {
@@ -23,8 +24,8 @@ export default class k_show extends Vue {
   private _init_():void{
       let self = this;
         g_ui.addEventListener(event_key.UI_RESIZE, self.onResize.bind(self),self); 
-        g_ui.addEventListener(event_key.UI_ECHARTS_DATA_SHOW, self.onEchartsShow.bind(self),self ); 
-        g_ui.addEventListener(event_key.UI_ECHARTS_DATA_UPDATE, self.onEchartsUpdate.bind(self),self ); 
+        g_main.g_logicMinData.addEventListener(event_key.UI_ECHARTS_DATA_SHOW, self.onEchartsShow.bind(self),self ); 
+        g_main.g_logicMinData.addEventListener(event_key.UI_ECHARTS_DATA_UPDATE, self.onEchartsUpdate.bind(self),self ); 
         //self.myChart.setOption(dconf);
   }
   private mounted():void {
@@ -50,7 +51,11 @@ export default class k_show extends Vue {
 
         //https://echarts.apache.org/zh/api.html#events
         self.myChart.on('click', self.onEleClick, self); 
-        self.myChart.setOption(def_option_more);
+        self.myChart.on('dataZoom', self.onDataZoom, self); 
+        self.myChart.on('brushSelected', self.onBrushSelected, self); 
+
+        //self.myChart.setOption(def_option_more);
+        self.refreshShow(def_option_more);
         self.myChart.clear();
     }
 
@@ -61,22 +66,101 @@ export default class k_show extends Vue {
   }
   private onEchartsShow(evt:any):void {
     this.myChart.clear();
-    this.myChart.setOption(evt.data);
+    //this.myChart.setOption(evt.data);
+    this.refreshShow(evt.data);
   }
   private onEchartsUpdate(evt:any):void {
-    this.myChart.setOption(evt.data);
+    //this.myChart.setOption(evt.data);
+    this.refreshShow(evt.data);
   }
 
-  private onEleClick(params:any)
-  {// params.value为数组,第一个值为数据在总数据数组中的下标
-	  console.log(params)
-	  if(params.componentType!="series"){
+  private refreshShow(opt)
+  {
+    let self = this;
+    let dzoom = null;
+    if (opt.dataZoom)
+    {
+      for (let i=opt.dataZoom.length-1;i>=0;i--)
+      { 
+        let v = opt.dataZoom[i];
+        if (v.type || v.start ==undefined) 
+        {
+          continue;
+        }
+        dzoom = v;
+        break;
+      }
+    }
+    
+    if (!dzoom)
+    {
+      console.error("refreshShow setOption err! dzoom null!");
+      self.myChart.setOption(opt);
       return;
     }
-    g_ui.dispatch(event_key.UI_ACT_SEL_POINT,params.value[0]); 
+    if (self._zoom)
+    {
+      dzoom.start = self._zoom.start;
+      dzoom.end= self._zoom.end;
+      //self.myChart.dispatchAction(self._zoom);
+    }else{
+      self._zoom = {start:0,end:0};
+      self._zoom.start = dzoom.start  ;
+      self._zoom.end = dzoom.end ;
+    }
+
+    self.myChart.setOption(opt);
+  }
+  private _zoom:{start:number,end:number}= null;
+  private onDataZoom(params:any)
+  {
+    if (params.batch!=undefined && params.batch.length>0)
+    {
+      let batch = params.batch;
+      for (let i=batch.length-1;i>=0;i--)
+      {
+          if (batch[i].type == "datazoom")
+          {
+            params = batch[i];
+            break;
+          }
+      }
+    }
+    if (params.start == undefined || params.end == undefined)
+    {
+      return;
+    }
+    this._zoom.start = params.start;
+    this._zoom.end= params.end;
+  }
+  private onEleClick(params:any)
+  {// params.value为数组,第一个值为数据在总数据数组中的下标
+	  //console.log(params)
+	  //if(params.componentType!="series"){
+    //   return;
+    // }
+    //g_ui.dispatch(event_key.UI_ACT_SEL_ELE,params.value[0]); 
+    g_ui.dispatch(event_key.UI_ACT_SEL_ELE,params); 
 
   }
 
+
+  private onBrushSelected(params) {
+      let brushComponent = params.batch[0];
+      let sels = [];
+
+     var dataIndices = brushComponent.selected[0].dataIndex;
+     if (dataIndices.length >1 )
+     {
+       sels.push(dataIndices[0]);
+       sels.push(dataIndices[dataIndices.length-1]);
+     }
+     else if (dataIndices.length ==1 )
+     {
+       sels.push(dataIndices[0]);
+     }
+     g_ui.dispatch(event_key.UI_ACT_SEL_ELES,sels); 
+  }
 }
 
 		let def_option:any = {

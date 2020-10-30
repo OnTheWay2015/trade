@@ -14,7 +14,6 @@ export class M_Mindata extends EventDispatcher
         super();
     }
     private _data:{datafmt:any,dataraw:any,datarawMap:any,marklines:any[],markpoints:any[]};
-    private _h_fmt:H_fmt_echarts;
     public getDataByStartTime(k: string): any {
         let self = this;
         if (self._data[k]) {
@@ -43,19 +42,19 @@ export class M_Mindata extends EventDispatcher
     public getShowData()
     {
         let self = this;
-        let fmt_data = self._data.datafmt;
-        self._h_fmt.reset(); 
-        let opdata = self._h_fmt 
-            .setTitle("trade_data") 
-            .setCategoryData(fmt_data.categoryData)
-            .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
-            .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
-            .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
-            .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
-            .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
-            .getOptions();
-
-        return opdata;
+        //let fmt_data = self._data.datafmt;
+//        self._h_fmt.reset(); 
+//        let opdata = self._h_fmt 
+//            .setTitle("trade_data") 
+//            .setCategoryData(fmt_data.categoryData)
+//            .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
+//            .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
+//            .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
+//            .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
+//            .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
+//            .getOptions();
+//
+        return self._data;
     }
 
     public getMarkPoint(idx:number)
@@ -106,20 +105,20 @@ export class M_Mindata extends EventDispatcher
         //var info = await ax.get(API_MIN_DATA + args);
         var info = await http.asyncGet(HTTP_SERVER+API_MIN_DATA + args);
        
-        self._h_fmt = new H_fmt_echarts();
-        let fmt_data = self.formatData(info);
-        let opdata = self._h_fmt 
-            .setTitle("trade_data") 
-            .setCategoryData(fmt_data.categoryData)
-            .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
-            .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
-            .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
-            .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
-            .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
-            .getOptions();
+        //self._h_fmt = new H_fmt_echarts();
+        let data = self.formatData(info);
+        //let opdata = self._h_fmt 
+        //    .setTitle("trade_data") 
+        //    .setCategoryData(fmt_data.categoryData)
+        //    .setValuesCandlestick(fmt_data.values,{name:"d-k",dataraw:self._data.dataraw,marklines:self._data.marklines,markpoints:self._data.markpoints})
+        //    .setValuesAddLine(fmt_data.linevalues_5d,{name:"ma5"})
+        //    .setValuesAddLine(fmt_data.linevalues_10d,{name:"ma10"})
+        //    .setValuesAddLine(fmt_data.linevalues_20d,{name:"ma20"})
+        //    .setValuesAddLine(fmt_data.linevalues_30d,{name:"ma30"})
+        //    .getOptions();
 
         console.log("logicmindata getdata!");
-        return opdata;
+        return data;
     }
 
     private formatData(d: any): any {
@@ -173,29 +172,40 @@ export class M_Mindata extends EventDispatcher
            ,{idx1:24,idx2:30,valueidx1:1,valueidx2:1} 
         ];
         self._data = {datafmt:datafmt,dataraw:arr,datarawMap:datarawmap,markpoints:markpoints,marklines:marklines};
-        return datafmt;
+        return self._data;
     }
 
     //
-    public addPoint(idx:number,valueidx:number)
+    public addPoint(idx:number,valueidx:number):number
     {
-       let self = this;
-       self._data.markpoints.push({idx:idx,valueidx:valueidx}); 
-        self.dispatch(event_key.DATA_ACT_ADD_POINT,null);
+        let self = this;
+        let points = self._data.markpoints;
+        for (let i = points.length - 1; i >= 0; i--) {
+            let v = points[i];
+            if (v.idx == idx && v.valueidx == valueidx) {
+                return -1;
+            }
+        }
+        points.push({ idx: idx, valueidx: valueidx });
+        self.dispatch(event_key.DATA_ACT_ADD_POINT, null);
+        return 0;
     }
-    public delPoint(idx:number)
+    public delPoint(idx:number):number
     {
        let self = this;
        let arr = self._data.markpoints;
+       let res = -1;
        for (let i=arr.length-1;i>=0;i--)
        {
             if (arr[i].idx == idx)
             {
                 arr.splice(i,1);
+                res = 0;
                 break;
             }
        }
        self.dispatch(event_key.DATA_ACT_DEL_POINT,null);
+       return res;
     }
 
     public addLine(idx1:number,valueidx1:number,idx2:number,valueidx2:number)
@@ -215,7 +225,8 @@ export class M_Mindata extends EventDispatcher
        let arr = self._data.marklines;
        for (let i=arr.length-1;i>=0;i--)
        {
-            if (arr[i].idx1 == idx1 && arr[i].idx2==idx2)
+            if (arr[i].idx1 == idx1 && arr[i].idx2==idx2 ||
+            arr[i].idx1 == idx2 && arr[i].idx2==idx1)
             {
                 arr.splice(i,1);
                 break;

@@ -1,3 +1,5 @@
+import { END_PRICE_IDX,LOW_PRICE_IDX  } from './configs';
+import event_key from './event_key';
 import { deepClone } from './utils';
 
 enum series_tp{
@@ -18,6 +20,8 @@ export default class H_fmt_echarts
         return this;
     }
    
+//-----------
+    private toolCallback:any= null;
 //-----------
     private _showcount_def:number = 500;
     private _showST_def:number = 0;
@@ -46,7 +50,12 @@ export default class H_fmt_echarts
         this.addvalues(series_tp.CANDLESTICK, v, ops);
         return this;
     }
-
+    public setToolCallback(v:any)
+    {
+        let self = this;
+        self.toolCallback = v;
+        return self;
+    }
     public setValuesAddLine(v:any,ops:any)
     {
         if (!v || v.length<=0)
@@ -91,6 +100,8 @@ export default class H_fmt_echarts
         let dataZoom: any[] = self.getDataZoom();
         let series = self.getSeries();
         let legend = self.getLegend();
+        let toolbox = self.getToolBox();
+        let brush  = self.getBrush();
         let t = this._title ? this._title : 'title---';
         return {
             title:{
@@ -103,6 +114,8 @@ export default class H_fmt_echarts
             backgroundColor: '#21202D',
             tooltip: tooltip,
             legend: legend,
+            toolbox:toolbox,
+            brush:brush,
             grid: grid,
             xAxis: xAxis,
             yAxis: yAxis,
@@ -138,9 +151,11 @@ export default class H_fmt_echarts
             case series_tp.LINE: 
                 data = {
                     type: 'line',
+                    animation: false,
                     name:  ops["name"]? ops["name"]:'lineName',
                     data: v,
                     smooth: true,
+                    symbol: "none",//标记的图形
                     lineStyle: {
                         opacity: 0.5
                     }
@@ -318,8 +333,14 @@ export default class H_fmt_echarts
                 shadowOffsetX: 2,
                 shadowOffsetY: 2
             }
-        }, {
-            type: 'inside'
+        }, 
+             {
+                type: 'inside',
+                zoomLock:false,
+            },
+            {
+                type: 'slider',
+                zoomLock:false,
         }];
     }
 
@@ -423,7 +444,7 @@ export default class H_fmt_echarts
                         {
                             name: 'from lowest to highest',
                             type: 'min',
-                coord: [v1[0], v1[valueidx1]],
+                            coord: [v1[0], v1[valueidx1]],
                             symbol: 'circle',
                             symbolSize: 10,
                             label: {
@@ -462,19 +483,30 @@ export default class H_fmt_echarts
     private getMarkPoints(kvalues:any,markidxs:any) {
         //mark  {下标,标识数据块哪个属性}
         let values = []; 
-        for (let i=0;i<markidxs.length;i++)
-        {
+        let itemstyle = {
+            color: 'rgb(41,60,85)'
+        }
+        for (let i = 0; i < markidxs.length; i++) {
             let mark = markidxs[i];
             let v = kvalues[mark.idx];
+            let rot = 0;
+            if(mark.valueidx== LOW_PRICE_IDX )
+            {
+                itemstyle = {
+                    color: 'rgb(00,00,85)'
+                };
+                rot = 180;
+            }
             values.push({
+                symbol:"pin",
+                symbolRotate:rot,
                 name: v[0] + ' 标点',
                 coord: [v[0], v[mark.valueidx]],
                 value: v[mark.valueidx],
-                itemStyle: {
-                    color: 'rgb(41,60,85)'
-                }
+                itemStyle: itemstyle
             });
-        } 
+        }
+
         //{
         //    name: 'XX标点',
         //        coord: ['2013/5/31', 2300],
@@ -485,6 +517,7 @@ export default class H_fmt_echarts
         //},
         
         let fmt = {
+                symbol:"pin",
                 label: {
                     normal: {
                         formatter: function (param) {
@@ -495,5 +528,121 @@ export default class H_fmt_echarts
                 data:values
         };
         return fmt;
+    }
+
+
+    private getToolBox()
+    {
+        let self = this;
+        let toolbox = {
+            top:'3%',
+            left:'50%',
+            feature: {
+                brush: {
+                    type: ['lineX', 'clear']
+                },
+                myTool_addpoint: {
+                    show: true,
+                    icon: 'path://M534.115 489.885V132c0-11.05-8.952-20-19.996-20h-4.238c-11.046 0-19.996 8.954-19.996 20v357.885H132c-11.05 0-20 8.952-20 19.996v4.238c0 11.046 8.954 19.996 20 19.996h357.885V892c0 11.05 8.952 20 19.996 20h4.238c11.046 0 19.996-8.954 19.996-20V534.115H892c11.05 0 20-8.952 20-19.996v-4.238c0-11.046-8.954-19.996-20-19.996H534.115z',
+                    title: '添加点'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_ADD_POINT);
+                        }
+                    }
+                },
+                myTool_addline: {
+                    show: true,
+                    icon: 'path://M534.115 489.885V132c0-11.05-8.952-20-19.996-20h-4.238c-11.046 0-19.996 8.954-19.996 20v357.885H132c-11.05 0-20 8.952-20 19.996v4.238c0 11.046 8.954 19.996 20 19.996h357.885V892c0 11.05 8.952 20 19.996 20h4.238c11.046 0 19.996-8.954 19.996-20V534.115H892c11.05 0 20-8.952 20-19.996v-4.238c0-11.046-8.954-19.996-20-19.996H534.115z',
+                    title: '添加线'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_ADD_LINE);
+                        }
+                    }
+                },
+                myTool_clearMark: {
+                    show: true,
+                    icon: 'path://M867 557l-188 188q-29 29 -71 29v0q-41 0 -70 -29l-381 -381q-29 -29 -29 -70.5t29 -70.5l188 -189q29 -29 70.5 -29t70.5 29l381 382q29 29 29 70t-29 71zM471 49q-23 -23 -55.5 -23t-55.5 23l-189 188q-23 24 -23 56.5t23 55.5l77 77l300 -300zM853 430l-290 -290l-301 300l291 291q23 23 55.5 23t55.5 -23l189 -189q23 -23 23 -56t-23 -56zM602 29zM577 29q0 10 7.5 17.5t17.5 7.5t17.5 -7.5t7.5 -17.5t-7.5 -17.5t-17.5 -7.5t-17.5 7.5t-7.5 17.5zM693 29zM669 29q0 10 7 17.5t17.5 7.5t17.5 -7.5t7 -17.5t-7 -17.5t-17.5 -7.5t-17.5 7.5t-7 17.5zM785 29zM760 29q0 10 7 17.5t17.5 7.5t17.5 -7.5t7 -17.5t-7 -17.5t-17.5 -7.5t-17.5 7.5t-7 17.5z',
+                    title: '清空标记',
+                    onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_DEL_POINT);
+                        }
+                    }
+                },
+                myTool_clearMarkLine: {
+                    show: true,
+                    icon: 'path://M867 557l-188 188q-29 29 -71 29v0q-41 0 -70 -29l-381 -381q-29 -29 -29 -70.5t29 -70.5l188 -189q29 -29 70.5 -29t70.5 29l381 382q29 29 29 70t-29 71zM471 49q-23 -23 -55.5 -23t-55.5 23l-189 188q-23 24 -23 56.5t23 55.5l77 77l300 -300zM853 430l-290 -290l-301 300l291 291q23 23 55.5 23t55.5 -23l189 -189q23 -23 23 -56t-23 -56zM602 29zM577 29q0 10 7.5 17.5t17.5 7.5t17.5 -7.5t7.5 -17.5t-7.5 -17.5t-17.5 -7.5t-17.5 7.5t-7.5 17.5zM693 29zM669 29q0 10 7 17.5t17.5 7.5t17.5 -7.5t7 -17.5t-7 -17.5t-17.5 -7.5t-17.5 7.5t-7 17.5zM785 29zM760 29q0 10 7 17.5t17.5 7.5t17.5 -7.5t7 -17.5t-7 -17.5t-17.5 -7.5t-17.5 7.5t-7 17.5z',
+                    title: '清空线段'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_DEL_LINE);
+                        }
+                    }
+                },
+                myTool_cycle: {
+                    show: false,
+                    icon: 'path://M151.709749 946.380178l0-87.077218 740.886991 0 0 87.077218L151.709749 946.380178zM674.686754 510.566348l217.907938-174.326351 0 479.482399L674.686754 815.722396 674.686754 510.566348zM413.199275 815.721373 413.199275 336.238974l217.906915 174.325327 0 305.155025L413.199275 815.721373 413.199275 815.721373zM646.386198 367.222639l-0.724501-0.76441-0.041956 0.082888L387.448798 108.373243 173.627944 322.19512l-30.813796-30.81482L389.961014 44.191478l256.425184 261.403568 173.131129-173.134199-57.667398-57.7114 130.745786 0 0 130.830721-42.262546-42.304502L646.386198 367.222639zM369.616664 815.721373 151.709749 815.721373 151.709749 510.566348l217.906915-174.326351L369.616664 815.721373 369.616664 815.721373z',
+                    title: '周期线'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                        }
+                    }
+                },
+                myTool_4: {
+                    show: false,
+                    icon: 'path://M221.44 126.976l-221.504 768 803.84 0 220.096-768L221.44 126.976zM747.008 830.976 97.28 830.976l178.176-640 653.824 0L747.008 830.976z',
+                    title: '平行四边形'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                        }
+                    }
+                },
+                myTool_Forecast: {
+                    show: false,
+                    icon: 'path://M839.98294 601.496313l119.413694 0 0-59.706847L839.98294 541.789467 839.98294 601.496313zM780.276093 840.324724 780.276093 64.132646 63.790862 840.324724 780.276093 840.324724zM660.862399 720.91103 362.327142 720.91103l298.535257-298.535257L660.862399 720.91103zM839.98294 362.667903l119.413694 0 0-59.706847L839.98294 302.961056 839.98294 362.667903zM839.98294 64.132646l0 59.706847 119.413694 0L959.396633 64.132646 839.98294 64.132646zM839.98294 840.324724l119.413694 0 0-59.706847L839.98294 780.617877 839.98294 840.324724z',
+                    title: '预测'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                        }
+                    }
+                },
+                myTool_upload: {
+                    show: false,
+                    icon: 'path://M772.446777 368.57238c-11.789511-135.038556-123.906008-240.97633-260.659625-240.97633-136.75464 0-248.869091 105.937774-260.659625 240.97633C111.535259 374.298801 0.021489 490.091014 0.021489 632.497375c0 142.006248 110.890576 257.535471 249.932306 263.86462l0 0.606821 202.326055 0L452.27985 656.586003l-82.614579 0 130.007983-147.376559 127.031185 147.376559-79.212086 0 0 240.383836 226.12918 0 0-0.606821c139.04173-6.329149 249.932306-121.859395 249.932306-263.86462C1023.553838 490.091014 912.041092 374.298801 772.446777 368.57238zM761.719458 860.904435c-0.010233 0-0.021489-0.001023-0.031722-0.001023l-178.491207 0.001023L583.196529 692.695409l124.547621 0L500.924757 455.628108 294.105365 692.695409l122.469286 0 0 168.209026-142.818753-0.001023c0 0-0.104377-0.3776-0.154519-0.561795-3.9121 0.204661-7.78429 0.562818-11.746532 0.562818-124.887358 0-226.12918-102.262058-226.12918-228.40706 0-116.662023 86.71906-212.420971 198.529589-226.208998 19.543102-3.794419 39.769772-3.667529 51.962465-3.045359-0.180102-3.727904-0.559748-7.402597-0.559748-11.175527 0-126.147048 101.241822-228.408083 226.12918-228.408083s226.12918 102.260012 226.12918 228.408083c0 4.058432-0.393973 8.015557-0.600681 12.021801l59.860343 3.185552c108.001783 17.195637 190.673667 111.296829 190.673667 225.221508C987.848639 758.642376 886.606817 860.904435 761.719458 860.904435z',
+                    title: '补充'
+                    ,onclick: function (){
+                        if (self.toolCallback)
+                        {
+                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                        }
+                    }
+                }
+            }
+        };
+        return toolbox;
+    }
+
+    private getBrush()
+    {
+        let brush = {
+            xAxisIndex: 'all',
+            brushLink: 'all',
+            outOfBrush: {
+                colorAlpha: 0.1
+            }
+        };
+        return  brush;
     }
 }

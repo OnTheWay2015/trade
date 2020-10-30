@@ -1,4 +1,4 @@
-import LogicMain from '@/logicMain';
+import { LogicMain } from '@/logicMain';
 import UIMain from '@/UIMain';
 import EventDispatcher from "../util/eventdispatch"
 

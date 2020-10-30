@@ -1,12 +1,18 @@
 <template>
   <div id="app">
       <div id="r_top" >
+
            <div v-if="showSplitTools">
+              <el-row>
               <c_splite_time />
+              </el-row>
+              <el-row>
+              </el-row>
            </div>
       </div>
       <div id="r_midcav" >
         <div id="r_left" class="left_float" >
+              <c_opstate /> 
         </div>
         <div id="r_center"  class="left_float" >
            <div v-if="showKFlag">
@@ -17,17 +23,18 @@
         </div> 
       </div>
       <div id="r_foot" >
-    <el-button @click.native="onclick_k()">日k</el-button> 
-    <el-button @click.native="onclick_tick()">tick</el-button> 
-    <el-button @click.native="onclick_test()">test</el-button> 
       </div>
   </div>
 </template>
 
 <script lang="ts">
  /**
-  * 
-  *  */ 
+ 
+    <el-button @click.native="onclick_k()">日k</el-button> 
+    <el-button @click.native="onclick_tick()">tick</el-button> 
+    <el-button @click.native="onclick_test()">test</el-button> 
+ 
+ *  */ 
   
   //<img alt="Vue logo" src="./assets/logo.png">
     //<HelloWorld v-bind:msg="msg1"/>
@@ -35,7 +42,7 @@
     //<div id="main" style="width: 600px;height:400px;"></div>
     //<c_echarts_test />
    
-   
+  //<c_opstate /> 
    //<c_k_show />
     //<c_user_show/>
     //<c_test_vuex />
@@ -47,6 +54,7 @@ import c_echarts_test from '../test/myEcharts.vue';
 //import c_test_vuex_01 from '../test/test_vuex_01.vue';
 import c_k_show from '@/page/k_show.vue';
 import c_splite_time from '@/page/splite_time.vue';
+import c_opstate from '@/page/opstate.vue';
 //import c_user_show from 'user_show.vue';
 import event_key from '../util/event_key'
 import g_ui from '@/UIMain';
@@ -59,6 +67,7 @@ import g_ui from '@/UIMain';
     //c_test_vuex_01 ,
     c_k_show,
     c_splite_time ,
+    c_opstate ,
     //c_user_show,
   },
 })

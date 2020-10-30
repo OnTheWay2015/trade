@@ -12,9 +12,14 @@ export const API_MIN_DATA_ODS:string = "/min_data?type=ods";
 
 
 
+export const WS_URL = "ws://106.14.80.181:8800/ws/gofor";
+
 
 
 export const END_PRICE_IDX = 1;
+export const HIGHT_PRICE_IDX = 3;
+export const LOW_PRICE_IDX = 4;
+
 export const TIME_UNIT_MIN:number= 1;
 export const TIME_UNIT_HOUR:number= 2;
 export const TIME_UNIT_DAY:number= 3;

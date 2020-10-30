@@ -338,5 +338,90 @@ export default class  NetManager{
 //------------------
 
     }
+    export interface conn {
+        onConnect();
+        onError();
+        onClose();
+        onRecv(buf:ByteArray);
+    }
+    export class connection_single {
+        private _holder:conn;
+        private _sock:WebSocket;
+        private _ip:string;
+        constructor(n:any){
+            this._holder = n;
+            this.init();
+        }
+        private init():void{
+            this.createSock();
+        }
+        private createSock(){
+            let self = this;
+            if( self._sock ){
+                console.error("last connect is not disposed");
+                return;
+            }
+            //egret.EventDispatcher = egret.EventDispatcher;
+            //let evt = new EventDispatcher();
+            //self._sock = new HTML5WebSocket();
+            self._sock = new WebSocket();
+            self._sock.type = WebSocket.TYPE_BINARY;
+            self._sock.once(Event.CONNECT, self.onConnect, self);
+            self._sock.addEventListener( "ioError", self.onErr, self);
+            self._sock.once(Event.CLOSE, self.onClose, self); 
+        }
+
+        public connect(ip:string):void{
+            let self = this;
+            self._ip = ip;
+            console.error("socket connect["+ip+"] ");
+          
+            if (ip.indexOf("https") >= 0){
+                ip = ip.replace("https", "wss");
+            } else if (ip.indexOf("http") >= 0){
+                ip = ip.replace("http", "ws");
+            } else if (ip.indexOf("wss") < 0 && ip.indexOf("ws") < 0  ) {
+                console.error(" connect http ["+ ip +"] error");
+                return;
+            }
+            self._ip = ip;
+            self._sock.connectByUrl( ip );
+        }
+
+        private  onConnect(){
+            console.log( "net connected" );
+            //this._sock.addEventListener( "socketData" /*egret.ProgressEvent.SOCKET_DATA*/, this.onData, this);
+            this._sock.addEventListener(  Event.SOCKET_DATA/*egret.ProgressEvent.SOCKET_DATA*/, this.onData, this);
+            this._holder.onConnect();
+        }
+
+        private  onErr(){
+            console.error("connection onErr todo ") ;
+            this._holder.onError();
+        }
+
+        private  onClose(){
+            console.error("connection onClose todo ") 
+            this._holder.onClose();
+        }
+        private onData(){
+            let self = this;
+            let buf: ByteArray = new ByteArray();
+            buf.endian = Endian.LITTLE_ENDIAN;
+            self._sock.readBytes(buf);
+            self._holder.onRecv( buf );
+        }
+
+        public send(buf: ByteArray) {
+            var self = this;
+            self._sock.writeBytes(buf);
+            self._sock.flush();
+        }
+
+        public dispose():void{
+            let self = this;
+            self._sock = null;
+        }
+    }
 
 

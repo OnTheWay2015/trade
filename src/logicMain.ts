@@ -8,29 +8,34 @@ import * as utils from './util/utils'
 import Event from './util/event';
 import LogicMinData from './logic/logicMinData';
 import g_ui, { UIMain } from './UIMain';
+import { WS_URL } from './util/configs';
+import LogicNet from './logic/logicNet';
 
-export default class  LogicMain extends LogicBase
+export class  LogicMain extends LogicBase
 {
     private _vueRoot:Vue;
     private _mgrProcess:ManagerProcess;
     //private _logicTick:LogicTick;
     public g_logicMinData:LogicMinData;
     public g_uimain:UIMain;
-    constructor(v:Vue)
+    public g_NET:LogicNet;
+    constructor()
     {
         super(null);
+    }
+    public setVueRoot(v:Vue)
+    {
         this._vueRoot = v;
     }
-
     public start()
     {
         let self = this;
         console.log("logicMain start");
         self._mgrProcess.start( utils.FRAME_TM );
         self.g_uimain.start();
-
         //self._logicTick.show();
         //self._logicMinData.show();
+        self.g_NET.connect(WS_URL);
     }
     public init()
     {
@@ -44,9 +49,11 @@ export default class  LogicMain extends LogicBase
     {
         let self = this;
         self.g_logicMinData= new LogicMinData(self);
+        self.g_NET = new LogicNet(self);
 
         //init 
         self.g_logicMinData.init();
+        self.g_NET.init();
         
         
 
@@ -71,4 +78,8 @@ export default class  LogicMain extends LogicBase
 
 
 
+
 }
+
+let g_main = new LogicMain();
+export default g_main;

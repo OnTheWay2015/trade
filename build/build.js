@@ -163,8 +163,8 @@ let pack = () => {
             console.log(stats.toString());
         } else {
             console.log(stats.toString());
-            console.log("cost_time["+(stats.endTime-stats.startTime)/1000+"]");
             func_copy();
+            console.log("cost_time["+(stats.endTime-stats.startTime)/1000+"]");
         };
     });
 }

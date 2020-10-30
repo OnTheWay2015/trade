@@ -4,7 +4,6 @@ import root from './page/Root.vue'
 //element-ui
 import ElementUI from 'element-ui';
 //import 'element-ui/lib/theme-chalk/index.css';
-import LogicMain from "./logicMain"
 
 //-------------
 //import echarts from 'echarts'
@@ -18,6 +17,7 @@ import msg_type_def from './net/proto/msg_type_def';
 import { ACC, DEFAULT_AGENTID, DEFAULT_CHANNEL, DEFAULT_IP, DEFAULT_PACKAGETP, http, NET_KEY } from './net/httpHandle';
 import { pack_id } from './util/configs';
 import md5 from './net/Crypt';
+import g_main from './logicMain';
 var _testpb = () => {
 
   let p_NetMgr: NetManager;
@@ -133,10 +133,14 @@ let main = () => {
   };
   let com = new Vue(op);
 
+  g_main.setVueRoot(com);
+  g_main.init();
+
   com.$on("hook:mounted", (evt: any) => {
     console.log("VM com --->hook:mounted");
-    let lg = new LogicMain(com);
-    lg.init();
+    let lg = g_main;
+    //lg.setVueRoot(com);
+    //lg.init();
     lg.start();
   })
 

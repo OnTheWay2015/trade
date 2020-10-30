@@ -131,4 +131,72 @@ export function dateFMT(d:Date,f:string=null):string{
     return fmt;
 
 }
+/*'yyyy-MM-ddTHH:mm:ss+08:00'格式的字符串转日期*/
+export function stringToDate(str){
 
+    var tempStrs = str.split("T");
+    var dateStrs = tempStrs[0].split("-");
+
+    var year = parseInt(dateStrs[0], 10);
+
+    var month = parseInt(dateStrs[1], 10) - 1;
+
+    var day = parseInt(dateStrs[2], 10);
+
+    var tempStrs = tempStrs[1].split("+");
+    var timeStrs = tempStrs[0].split(":");
+
+    var hour = parseInt(timeStrs[0], 10);
+
+    var minute = parseInt(timeStrs[1], 10);
+
+    var second = parseInt(timeStrs[2], 10);
+
+    tempStrs = tempStrs[1].split(":");
+    var timezone = parseInt(tempStrs[0], 10);
+    var date = new Date(year, month, day, hour, minute, second);
+    var dif = timezone*60 -  date.getTimezoneOffset();//.getTimezoneOffset()，单位为分钟
+    var tar_date = new Date(date.getTime() + dif * 60 * 1000);
+    return tar_date;
+
+
+//目标时区，东9区
+//let targetTimezone = -9
+//// 当前时区与中时区时差，以min为维度
+//let _dif = new Date().getTimezoneOffset()
+//// 本地时区时间 + 时差  = 中时区时间
+//// 目标时区时间 + 时差 = 中时区时间
+//// 目标时区时间 = 本地时区时间 + 本地时区时差 - 目标时区时差
+//// 东9区时间
+//let east9time = new Date().getTime() + _dif * 60 * 1000 - (targetTimezone * 60 * 60 * 1000)
+
+
+}
+
+/*'yyyy-MM-dd HH:mm:ss'格式的字符串转日期*/
+
+export function stringToDateDEF(str){
+
+    var tempStrs = str.split(" ");
+
+    var dateStrs = tempStrs[0].split("-");
+
+    var year = parseInt(dateStrs[0], 10);
+
+    var month = parseInt(dateStrs[1], 10) - 1;
+
+    var day = parseInt(dateStrs[2], 10);
+
+    var timeStrs = tempStrs[1].split(":");
+
+    var hour = parseInt(timeStrs[0], 10);
+
+    var minute = parseInt(timeStrs[1], 10);
+
+    var second = parseInt(timeStrs[2], 10);
+
+    var date = new Date(year, month, day, hour, minute, second);
+
+    return date;
+
+}
