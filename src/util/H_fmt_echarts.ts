@@ -68,11 +68,18 @@ export default class H_fmt_echarts
         this.addvalues(series_tp.LINE, v, ops);
         return this;
     }
+    private _showToolBox:boolean = true;
+    public setToolBox(v:boolean)
+    {
+       this._showToolBox= v;
+        return this;
+    }
     public setTitle(s:string)
     {
        this._title = s;
         return this;
     }
+
     private addvalues(tp:series_tp,v:any,ops:{dataraw?:any,markpoints?:any,marklines?:any})
     {
         this._values.push({
@@ -100,7 +107,7 @@ export default class H_fmt_echarts
         let dataZoom: any[] = self.getDataZoom();
         let series = self.getSeries();
         let legend = self.getLegend();
-        let toolbox = self.getToolBox();
+        let toolbox = self._showToolBox ? self.getToolBox() : {};
         let brush  = self.getBrush();
         let t = this._title ? this._title : 'title---';
         return {
@@ -148,38 +155,39 @@ export default class H_fmt_echarts
         let data =null;
         switch (tp)
         {
-            case series_tp.LINE: 
+            case series_tp.LINE:
                 data = {
                     type: 'line',
                     animation: false,
-                    name:  ops["name"]? ops["name"]:'lineName',
+                    name: ops["name"] ? ops["name"] : 'lineName',
                     data: v,
                     smooth: true,
                     symbol: "none",//标记的图形
                     lineStyle: {
                         opacity: 0.5
                     }
-                }; 
-            break;
-            case series_tp.CANDLESTICK: 
-            //let vclone:any ={};
-            //deepClone(v,vclone);
-            data = {
-                type: 'candlestick',
-                animation: false,
-                name:  ops["name"]? ops["name"]:'k-name',
-                data: v,
-                itemStyle: self.getItemStyle(),
-            }; 
-            if (ops.marklines)
-            {
-                data.markLine = self.getMarkLines(ops.dataraw,ops.marklines); 
-            }
-            if (ops.markpoints)
-            {
-                data.markPoint = self.getMarkPoints(ops.dataraw,ops.markpoints); 
-            }
-            break;
+                };
+                if (ops.markpoints) {
+                    data.markPoint = self.getLineMarkPoints(ops.dataraw, ops.markpoints);
+                }
+                break;
+            case series_tp.CANDLESTICK:
+                //let vclone:any ={};
+                //deepClone(v,vclone);
+                data = {
+                    type: 'candlestick',
+                    animation: false,
+                    name: ops["name"] ? ops["name"] : 'k-name',
+                    data: v,
+                    itemStyle: self.getItemStyle(),
+                };
+                if (ops.marklines) {
+                    data.markLine = self.getMarkLines(ops.dataraw, ops.marklines);
+                }
+                if (ops.markpoints) {
+                    data.markPoint = self.getMarkPoints(ops.dataraw, ops.markpoints);
+                }
+                break;
         }
         if (!data)
         {
@@ -428,7 +436,10 @@ export default class H_fmt_echarts
             }
     
     */
+    private _colorcnt:number = 0;
     private getMarkLines(kvalues:any,markidxs:any) {
+        let self = this;
+        self._colorcnt = 0;
         //mark  {下标1, 下标2,标识数据块哪个属性}
         let values = []; 
         for (let i=0;i<markidxs.length;i++)
@@ -438,72 +449,106 @@ export default class H_fmt_echarts
             let v2 = kvalues[mark.idx2];
             let valueidx1 = mark.valueidx1;
             let valueidx2 = mark.valueidx2?mark.valueidx2:valueidx1;
+
+            //let color = "rgb("+ self._colorcnt *30%255 +", "+ self._colorcnt *50%255 +","+ self._colorcnt *70%255 +")";
+            let color = "";
+            let ci = self._colorcnt%3;
+            let cvalue = Math.abs(255 - self._colorcnt * 77);
+            if (ci == 0)
+            {
+                color = "rgb("+ cvalue+ ", 255,255)";
+            }
+            else if (ci == 1)
+            {
+                color = "rgb( 255,"+cvalue+",255)";
+
+            }
+            else{
+                color = "rgb( 255,255,"+cvalue+")";
+            }
+            self._colorcnt ++;
             values.push(
-               [
-
-                        {
-                            name: 'from lowest to highest',
-                            type: 'min',
-                            coord: [v1[0], v1[valueidx1]],
-                            symbol: 'circle',
-                            symbolSize: 10,
-                            label: {
-                                show: false
-                            },
-                            emphasis: {
-                                label: {
-                                    show: false
-                                }
-                            }
+                [
+                    {
+                        name: '',
+                        coord: [v1[0], v1[valueidx1]],
+                        symbol: 'circle',
+                        lineStyle: {
+                            color: color
                         },
-                        {
-                            type: 'max',
-                            coord: [v2[0], v2[valueidx2]],
-                            symbol: 'circle',
-                            symbolSize: 10,
-                            label: {
-                                show: false
-                            },
-                            emphasis: {
-                                label: {
-                                    show: false
-                                }
-                            }
-                        }
+                        symbolSize: 5,
+                        label: {
+                           position: "middle",
+                           formatter: self._showMarkLineLabelFunc
+                        },
+                        info: [mark.idx1, mark.idx2],
+                    },
+                    {
+                        coord: [v2[0], v2[valueidx2]],
+                        symbol: 'circle',
+                        symbolSize: 5,
+                    }
 
-               ] 
+                ]
             );
         } 
-        let fmt = {
-                symbol: ['none', 'none'],
-                data:values
+
+
+        let fmt: any = {
+            data: values
         };
         return fmt;
+    }
+    private _showMarkLineLabelFunc:any = null;
+    public setShowMarkLineLabelFunc(f:any)
+    {
+        let self = this;
+        self._showMarkLineLabelFunc = f;
+        return this;
     }
     private getMarkPoints(kvalues:any,markidxs:any) {
         //mark  {下标,标识数据块哪个属性}
         let values = []; 
-        let itemstyle = {
-            color: 'rgb(41,60,85)'
-        }
+        let self = this;
+        self._colorcnt = 0;
+        let color = "";
         for (let i = 0; i < markidxs.length; i++) {
+            let ci = self._colorcnt%3;
+            let cvalue = Math.abs(255 - self._colorcnt * 77);
+            if (ci == 0)
+            {
+                color = "rgb("+ cvalue+ ", 255,255)";
+            }
+            else if (ci == 1)
+            {
+                color = "rgb( 255,"+cvalue+",255)";
+
+            }
+            else{
+                color = "rgb( 255,255,"+cvalue+")";
+            }
+            self._colorcnt ++;
             let mark = markidxs[i];
             let v = kvalues[mark.idx];
             let rot = 0;
             if(mark.valueidx== LOW_PRICE_IDX )
             {
-                itemstyle = {
-                    color: 'rgb(00,00,85)'
-                };
                 rot = 180;
             }
             values.push({
                 symbol:"pin",
                 symbolRotate:rot,
+                label: {
+                    show: false
+                },
+                symbolSize:20,
                 name: v[0] + ' 标点',
                 coord: [v[0], v[mark.valueidx]],
                 value: v[mark.valueidx],
-                itemStyle: itemstyle
+                itemStyle: 
+                {
+                    color:color
+                }
             });
         }
 
@@ -517,11 +562,71 @@ export default class H_fmt_echarts
         //},
         
         let fmt = {
-                symbol:"pin",
                 label: {
                     normal: {
                         formatter: function (param) {
                             return param != null ? Math.round(param.value) : '';
+                        }
+                    }
+                },
+                data:values
+        };
+        return fmt;
+    }
+
+
+            //timemark: new Date().getTime(),
+            //idx: 20,
+            //price: 2000,
+            //direction: 0,
+            //COFlag: 0
+    private getLineMarkPoints(kvalues:any,markidxs:any) {
+        //mark  {下标,标识数据块哪个属性}
+        let values = []; 
+        let self = this;
+        let color = "rgb( 255,100,100)";
+        let dis = 15;
+        for (let i = 0; i < markidxs.length; i++) {
+            let mark = markidxs[i];
+            let v = kvalues[mark.idx];
+            let rot = 0;
+            if(mark.direction == 0)
+            {
+                rot = 180;
+                dis = -dis;
+            }
+            if(mark.COFlag== 0)
+            {
+                color = "rgb( 100,255,100)";
+            }
+            values.push({
+                symbol:'arrow',
+                symbolRotate:rot,
+                label: {
+                    show: true,
+                    position: "top",
+                    distance:dis,
+                },
+                symbolSize:20,
+                name: v[0] + ' 标点',
+                //coord: [v[0], v[mark.valueidx]],
+                coord: [v[0], v[END_PRICE_IDX]],
+                value: 0,
+                info:mark,
+                itemStyle: 
+                {
+                    color:color
+                }
+            });
+        }
+        
+        let fmt = {
+                label: {
+                    normal: {
+                        formatter: function (param) {
+                            //console.log("-------------param:");
+                            //console.log(param);
+                            return param != null ? Math.round(param.data.info.price) : '';
                         }
                     }
                 },

@@ -342,13 +342,13 @@ export default class  NetManager{
         onConnect();
         onError();
         onClose();
-        onRecv(buf:ByteArray);
+        onRecv(str:string);
     }
     export class connection_single {
         private _holder:conn;
         private _sock:WebSocket;
         private _ip:string;
-        constructor(n:any){
+        constructor(n:conn){
             this._holder = n;
             this.init();
         }
@@ -365,7 +365,7 @@ export default class  NetManager{
             //let evt = new EventDispatcher();
             //self._sock = new HTML5WebSocket();
             self._sock = new WebSocket();
-            self._sock.type = WebSocket.TYPE_BINARY;
+            //self._sock.type = WebSocket.TYPE_BINARY;
             self._sock.once(Event.CONNECT, self.onConnect, self);
             self._sock.addEventListener( "ioError", self.onErr, self);
             self._sock.once(Event.CLOSE, self.onClose, self); 
@@ -406,10 +406,9 @@ export default class  NetManager{
         }
         private onData(){
             let self = this;
-            let buf: ByteArray = new ByteArray();
-            buf.endian = Endian.LITTLE_ENDIAN;
-            self._sock.readBytes(buf);
-            self._holder.onRecv( buf );
+          let str =   self._sock.readUTF();
+            self._holder.onRecv( str );//        public readUTF():string {
+
         }
 
         public send(buf: ByteArray) {

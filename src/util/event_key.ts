@@ -9,6 +9,7 @@ enum event_key  {
     
     ,DATA_ACT_DEL_POINT = "DATA_ACT_DEL_POINT "
     ,DATA_ACT_DEL_LINE= "DATA_ACT_DEL_LINE"
+    ,DATA_ACT_CURR_DATA= "DATA_ACT_CURR_DATA"
     //------------------
     ,LG_="LG_" //send logic 
     ,LGACT_="LGACT_" //logic send out
@@ -18,6 +19,7 @@ enum event_key  {
     ,LGACT_TICK_DATA_UPDATE ="LGACT_TICK_DATA_UPDATE"
     ,LGACT_MIN_DATA_SHOW="LGACT_MIN_DATA_SHOW"
     ,LGACT_MIN_DATA_UPDATE ="LGACT_MIN_DATA_UPDATE"
+    ,LGACT_CURR_DATA="LGACT_CURR_DATA"
     //------------------
     
     ,LG_MIN_DATA_SET_PARAMS="LG_MIN_DATA_SET_PARAMS"
@@ -44,12 +46,15 @@ enum event_key  {
 
 
     ,UI_ACT_SEL_CLEAR= "UI_ACT_SEL_CLEAR"
+    ,UI_ACT_DEAL_DATA="UI_ACT_DEAL_DATA" 
+    ,UI_ACT_CHANGE_SHOW= "UI_ACT_CHANGE_SHOW"
     ,UI_ACT_SEL_ELE= "UI_ACT_SEL_ELE"
     ,UI_ACT_SEL_ELES= "UI_ACT_SEL_ELES"
     ,UI_ACT_ADD_LINE= "UI_ACT_ADD_LINE"
     ,UI_ACT_DEL_LINE= "UI_ACT_DEL_LINE"
     ,UI_ACT_ADD_POINT= "UI_ACT_ADD_POINT"
     ,UI_ACT_DEL_POINT= "UI_ACT_DEL_POINT"
+    ,UI_ACT_TURN_MARKLINE_LABEL= "UI_ACT_TURN_MARKLINE_LABEL"
     
     ,UI_ACT_SEL_POINT_FLAG= "UI_ACT_SEL_POINT_FLAG"
     
@@ -60,5 +65,19 @@ enum event_key  {
 
     //------------------
 };
+
+//.faq cant export
+export enum _key_board {
+    ENTER = 13,
+    DEL = 46,
+    ARW_DOWN = 40,
+    ARW_UP= 38,
+};
+
+export const KEY_BOARD_ENTER = 13;
+export const KEY_BOARD_DEL= 46;
+export const KEY_BOARD_ARW_DOWN= 40;
+export const KEY_BOARD_ARW_UP= 38;
+
 
 export default event_key;  
