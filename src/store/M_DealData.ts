@@ -20,7 +20,8 @@ export class M_DealData extends EventDispatcher
         let self = this;
         //let args = paramsUrlFMT(["contract_id","period"],[id,period]);
         var info = await http.asyncGet(HTTP_SERVER_DEAL+API_DEAL_DATA);
-        console.log("get Complete data:" + info);
+        console.log("get Complete data:" );
+        console.log(info);
         
         /**
          [

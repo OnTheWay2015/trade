@@ -33,12 +33,12 @@ export const TIME_UNIT_MIN:number= 1;
 export const TIME_UNIT_HOUR:number= 2;
 export const TIME_UNIT_DAY:number= 3;
 //----------
-export const DEAL_IDX_ID:number= 1;//合约代码
-export const DEAL_IDX_DIRECTION:number= 7;//买卖方向
-export const DEAL_IDX_PRICE:number= 9;//成交价格
+export const DEAL_IDX_ID:number= 4;//合约代码
+export const DEAL_IDX_DIRECTION:number= 5;//买卖方向
+export const DEAL_IDX_PRICE:number= 8;//成交价格
 export const DEAL_IDX_TRADETIME_DATE:number= 11;// 时间,年月日  
-export const DEAL_IDX_TRADETIME:number= 12;// 时间 
-export const DEAL_IDX_COFLAG:number= 3;//开平标记
+export const DEAL_IDX_TRADETIME:number= 9;// 时间 
+export const DEAL_IDX_COFLAG:number= 7;//开平标记
 
 
 

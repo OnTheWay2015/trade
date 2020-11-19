@@ -317,6 +317,7 @@ export class M_Mindata extends EventDispatcher
         }
         //self._data.d todo add
         let trade_list = self._data.d.trade_list ;
+        let chg:boolean = false;
         if (!trade_list ||trade_list.length<=0)
         {
            trade_list.push([
@@ -332,6 +333,9 @@ export class M_Mindata extends EventDispatcher
             ,0
             ,0
            ]);
+           chg = true;
+           console.log("tryAddData empty add:");
+           console.log(dataArr);
         }
         else {
             let last = trade_list[trade_list.length - 1];
@@ -340,10 +344,24 @@ export class M_Mindata extends EventDispatcher
             let addtm = de.getTime();
             let newtm = lasttm + timeseg;
             if (newtm <= addtm) {
-                last[START_PRICE_IDX] = dataArr[1];
-                last[END_PRICE_IDX] = dataArr[2];
-                last[HIGHT_PRICE_IDX] = dataArr[3];
-                last[LOW_PRICE_IDX] = dataArr[4];
+                if (last[START_PRICE_IDX] != dataArr[1] &&
+                    last[END_PRICE_IDX] != dataArr[2] &&
+                    last[HIGHT_PRICE_IDX] != dataArr[3] &&
+                    last[LOW_PRICE_IDX] != dataArr[4]) {
+            
+                        last[START_PRICE_IDX] = dataArr[1];
+                        last[END_PRICE_IDX] = dataArr[2];
+                        last[HIGHT_PRICE_IDX] = dataArr[3];
+                        last[LOW_PRICE_IDX] = dataArr[4];
+                        chg = true;
+
+                        console.log("tryAddData exsit update:");
+                        console.log(dataArr);
+                }
+                else{
+                        console.log("tryAddData exsit update same:");
+                        console.log(dataArr);
+                }
             }
             else {
                 let detmp = new Date(newtm);
@@ -362,10 +380,17 @@ export class M_Mindata extends EventDispatcher
                     , newtm
                 ];
                 trade_list.push(add);
+                chg = true;
+                
+                console.log("tryAddData add:");
+                console.log(dataArr);
             }
         }
-        self.formatData(self._data.d);
-        self.dispatch(event_key.LGACT_CURR_DATA,null);
+        if (chg)
+        {
+            self.formatData(self._data.d);
+            self.dispatch(event_key.LGACT_CURR_DATA, null);
+        }
     }
 
         //self._params.period = timeCount;

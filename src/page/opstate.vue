@@ -62,7 +62,7 @@ import lang from '@/util/lang';
 
 @Component
 export default class OpstateShow extends Vue {
-    private showstate:boolean = true;
+    private showstate:boolean = false;
     private showbtn:boolean = false;
     private stateStr:string = lang.xxx;
     private btn_turn_markline_label:string = lang.show_distance

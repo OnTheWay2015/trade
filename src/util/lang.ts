@@ -7,7 +7,7 @@ enum lang {
     ,change_show_mbm="分时图"
     ,show_distance="显示间隔"
     ,show_diff_price="显示差价"
-    ,get_deal_data="交易数据"
+    ,get_deal_data="下单数据"
 };
 
 export  default lang;

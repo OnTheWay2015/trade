@@ -34,16 +34,16 @@ export default class LogicCurrData extends LogicBase
             let c:string = arr[i];
             if (c.indexOf("Timestamp")>=0)
             {                   
-            
-                c = c.substr(c.indexOf("'"+1));
-                c = c.substr(0,c.indexOf("'"));
+                let idx1 =  c.indexOf("(") + 2;
+                c = c.substr(idx1, c.length);
+                c = c.substr(0, 19);
                 matchstr = c;
                 break;
             }
         }
         if (matchstr != "")
         {
-            let id= arr[0].substr(2,arr[0].lastIndexOf("'"));
+            let id= arr[0].substr(2,6);
             //let de = stringToDate(matchstr);
             let de = stringToDateDEF(matchstr);
             //console.log("---------->" + de.toDateString());    
@@ -51,11 +51,11 @@ export default class LogicCurrData extends LogicBase
             //console.log("---------->" + de.toString());    
             g_mindata.tryAddData(id,[
                 de
-                ,arr[2]
-                ,arr[3]
-                ,arr[4]
-                ,arr[5]
-                ,arr[6]
+                ,parseInt(arr[2])
+                ,parseInt(arr[3])
+                ,parseInt(arr[4])
+                ,parseInt(arr[5])
+                ,parseInt(arr[6])
             ]);
         }
         else

@@ -154,7 +154,8 @@ export default class RootShow extends Vue {
   private date_value_ed:Date=new Date(0);
   private select_unit_value:number=1;
   private input_num:string="1";
-  private contractID:string =  'ag2102';
+  private contractID:string =  'rb2101';
+  //private contractID:string =  'ag2102';
 
   private UNITs:any[] = [
          {value:TIME_UNIT_MIN,label:"分钟"}
