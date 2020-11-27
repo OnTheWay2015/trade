@@ -1,10 +1,10 @@
 let configs = {};
 export const HTTP_SERVER_DEAL:string = "http://139.196.45.10:8888"
-export const HTTP_SERVER:string = "http://106.14.80.181:8000";
+export const HTTP_SERVER:string = "http://106.14.80.181:8800";
 export const HTTP_SERVER_WS:string = "http://106.14.80.181:8800";
 export const API_TICK_DATA:string = "/tick_data";
 export const API_TICK_DATA_ODS:string = "/tick_data?type=ods";
-export const API_MIN_DATA:string = "/trade_date";
+export const API_MIN_DATA:string = "/contract_date";
 export const API_DEAL_DATA:string = "/get_deal_list";
 //export const API_MIN_DATA:string = "/min_data";
 //export const API_MIN_DATA:string = "/min_data?id=au2102&date=20200915&min=10";

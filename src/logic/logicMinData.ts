@@ -512,6 +512,10 @@ export default class LogicMinData extends LogicBase
     public async show() {
         let self = this;
         let d = await this.getData();
+        if (!d)
+        {
+            return;
+        }
         let v = self.fmtShowData(d);
         self.m_main.g_logicCurrdata.setConfig(self._id, self._timeCount); 
         //self.dispatch(event_key.LGACT_MIN_DATA_SHOW, d);

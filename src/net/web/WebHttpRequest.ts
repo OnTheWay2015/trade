@@ -36,7 +36,7 @@ import Event from '../event';
      * @private
      */
     export class WebHttpRequest extends EventDispatcher implements HttpRequest{
-
+        private DEBUG:boolean = true;
         /**
          * @private
          */
@@ -249,7 +249,7 @@ import Event from '../event';
          * @private
          */
         private onTimeout(): void {
-            if (DEBUG) {
+            if (this.DEBUG) {
                 console.log("1052 :" +  this._url);
             }
             //this.dispatchEventWith(IOErrorEvent.IO_ERROR);
@@ -267,7 +267,7 @@ import Event from '../event';
                 let self = this;
                 window.setTimeout(function (): void {
                     if (ioError) {//请求错误
-                        if (DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
+                        if (self.DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
                             console.error("1011:" + url);
                         }
                         self.dispatchEventWith(Event.IO_ERROR);
@@ -300,7 +300,7 @@ import Event from '../event';
             let ioError = (xhr.status >= 400);
             window.setTimeout(function (): void {
                 if (ioError) {//请求错误
-                    if (DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
+                    if (self.DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
                         console.error("1011:" + url);
                     }
                     self.dispatchEventWith(Event.IO_ERROR);
@@ -318,7 +318,7 @@ import Event from '../event';
             let url = this._url;
             let self = this;
             window.setTimeout(function (): void {
-                if (DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
+                if (self.DEBUG && !self.hasEventListener(Event.IO_ERROR)) {
                     console.error("1011:" + url);
                 }
                 self.dispatchEventWith(Event.IO_ERROR);

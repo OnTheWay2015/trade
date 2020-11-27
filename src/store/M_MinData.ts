@@ -108,11 +108,17 @@ export class M_Mindata extends EventDispatcher
         date_ed = date_ed.replace(reg_1, "%3A");
         date_ed = date_ed.replace(reg_2, "%20");
 
-        let args = paramsUrlFMT(["contract_id","date_start","date_stop","data_min"],[id,date_st,date_ed,timeCount]);
+        //let args = paramsUrlFMT(["contract_id","date_start","date_stop","data_min"],[id,date_st,date_ed,timeCount]);
+        let args = paramsUrlFMT(["contract_id","period"],[id,timeCount]);
 
         ax.defaults.baseURL = HTTP_SERVER;
         //var info = await ax.get(API_MIN_DATA + args);
         var info = await http.asyncGet(HTTP_SERVER+API_MIN_DATA + args);
+        if (info == null)
+        {
+            console.log("id["+id+"] ["+date_st+" - "+date_ed+"] no mindata!");
+            return;
+        }
         self._params.period = timeCount;
         self._params.id= id;
        
