@@ -19,6 +19,19 @@
 <el-row>
   <el-button class="button_width"  @click.native="turnMarkLineLabel()">{{btn_turn_markline_label}}</el-button> 
 </el-row>
+<el-row>
+  <el-button class="button_width"  @click.native="turnMtmByday()">{{btn_turn_mbm_label}}</el-button> 
+</el-row>
+<el-row>
+    <div v-if="shows_mbm_date">
+    <el-date-picker class="splite_time_line button_width"
+      v-model="date_value_st"
+      type="date"
+      @change="mbm_date_select"
+      placeholder="选择日期">
+    </el-date-picker>
+    </div>
+</el-row>
 
   <el-row v-for="item in items">
     {{ item.key}} : {{item.value}}
@@ -56,7 +69,7 @@ import event_key from '@/util/event_key'
 import g_ui from '@/UIMain';
 import g_main from '@/logicMain';
 import { dateFMT, stringToDate } from '@/util/utils';
-import { DEAL_IDX_TRADETIME_DATE,DEAL_IDX_DIRECTION, DEAL_IDX_ID, DEAL_IDX_PRICE, DEAL_IDX_TRADETIME, HIGHT_PRICE_IDX, LOW_PRICE_IDX } from '@/util/configs';
+import { DEAL_IDX_TRADETIME_DATE,DEAL_IDX_DIRECTION, DEAL_IDX_ID, DEAL_IDX_PRICE, DEAL_IDX_TRADETIME,MARK_TIME_IDX, START_PRICE_IDX ,END_PRICE_IDX ,HIGHT_PRICE_IDX, LOW_PRICE_IDX } from '@/util/configs';
 
 import lang from '@/util/lang';
 
@@ -64,10 +77,14 @@ import lang from '@/util/lang';
 export default class OpstateShow extends Vue {
     private showstate:boolean = false;
     private showbtn:boolean = false;
+    private shows_mbm_date:boolean = true;
+    private date_value_st:Date=new Date(0);
+
     private stateStr:string = lang.xxx;
     private btn_turn_markline_label:string = lang.show_distance
     private change_show:string =lang.change_show_mbm; 
     private getDealData_label:string =lang.get_deal_data;
+    private btn_turn_mbm_label:string = lang.show_mbm_day;
     private items:any[]=[];
     private showData:any[] = [];
   private _init_():void{
@@ -146,18 +163,20 @@ export default class OpstateShow extends Vue {
 //    self.$forceUpdate(); 
 //  }
 //
+
+
   private fmtShowBlock(p:any)
   {
     let itm:any[]=[];
     let v = p.v;
-    let str = v[0];
+    let str = v[MARK_TIME_IDX];
     itm.push({key:"---------------------",value:""});
     //itm.push({key:"date",value:dateFMT( stringToDate(str) ) });
     itm.push({key:"date",value:str });
-    itm.push({key:"start_price",value:v[1]});
-    itm.push({key:"end_price",value:v[2]});
-    itm.push({key:"hight_price",value:v[3]});
-    itm.push({key:"low_price",value:v[4]});
+    itm.push({key:"start_price",value:v[START_PRICE_IDX]});
+    itm.push({key:"end_price",value:v[END_PRICE_IDX ]});
+    itm.push({key:"hight_price",value:v[HIGHT_PRICE_IDX ]});
+    itm.push({key:"low_price",value:v[LOW_PRICE_IDX ]});
     return itm;
   }
   private mounted():void {
@@ -168,18 +187,18 @@ export default class OpstateShow extends Vue {
   private onSELclick():void {
     console.log("opstate.vue onSELclick---");
     let self = this;
-    g_ui.dispatch(event_key.UI_ACT_SEL_POINT_FLAG, null);
+    g_ui.dispatch(event_key.UIACT_SEL_POINT_FLAG, null);
   }
   private onOPclickAdd():void {
     console.log("opstate.vue onOPclickAdd---");
     let self = this;
     if (self.showData.length == 1)
     {
-      g_ui.dispatch(event_key.UI_ACT_ADD_POINT, self.showData[0]);
+      g_ui.dispatch(event_key.UIACT_ADD_POINT, self.showData[0]);
     }
     else
     {
-      g_ui.dispatch(event_key.UI_ACT_ADD_LINE, self.showData);
+      g_ui.dispatch(event_key.UIACT_ADD_LINE, self.showData);
     }
 
   }
@@ -188,11 +207,11 @@ export default class OpstateShow extends Vue {
     let self = this;
     if (self.showData.length == 1)
     {
-      g_ui.dispatch(event_key.UI_ACT_DEL_POINT, self.showData[0]);
+      g_ui.dispatch(event_key.UIACT_DEL_POINT, self.showData[0]);
     }
     else
     {
-      g_ui.dispatch(event_key.UI_ACT_DEL_LINE, self.showData);
+      g_ui.dispatch(event_key.UIACT_DEL_LINE, self.showData);
     }
   }
   
@@ -205,10 +224,10 @@ export default class OpstateShow extends Vue {
     else{
       self.change_show=lang.change_show_mbm;
     }
-    g_ui.dispatch(event_key.UI_ACT_CHANGE_SHOW, null);
+    g_ui.dispatch(event_key.UIACT_CHANGE_SHOW, null);
   }
   private getDealData():void{
-    g_ui.dispatch(event_key.UI_ACT_DEAL_DATA, null);
+    g_ui.dispatch(event_key.UIACT_DEAL_DATA, null);
   }
   private turnMarkLineLabel():void{
     let self = this;
@@ -219,8 +238,24 @@ export default class OpstateShow extends Vue {
     else{
       self.btn_turn_markline_label=lang.show_distance;
     }
-    g_ui.dispatch(event_key.UI_ACT_TURN_MARKLINE_LABEL, null);
+    g_ui.dispatch(event_key.UIACT_TURN_MARKLINE_LABEL, null);
   }
+  private turnMtmByday():void{
+    let self = this;
+    if (self.btn_turn_mbm_label==lang.show_mbm)
+    {
+      self.btn_turn_mbm_label=lang.show_mbm_day;
+    }
+    else{
+      self.btn_turn_mbm_label=lang.show_mbm;
+    }
+    g_ui.dispatch(event_key.UIACT_TURN_MBM_CHANGE_SHOW, null);
+  }
+  private mbm_date_select():void {
+    let self = this;
+    g_ui.dispatch(event_key.UIACT_TURN_MBM_DATE_SELECT, self.date_value_st);
+  }
+
 }
 
 </script>

@@ -2,7 +2,7 @@ import  LogicBase from "./logicBase"
 import event_key, { _key_board }  from '@/util/event_key';
 import Event from '@/util/event';
 import g_mindata, { M_Mindata } from '@/store/M_MinData';
-import { DEAL_IDX_TRADETIME_DATE,DEAL_IDX_DIRECTION, DEAL_IDX_ID, DEAL_IDX_PRICE, DEAL_IDX_TRADETIME, HIGHT_PRICE_IDX, LOW_PRICE_IDX } from '@/util/configs';
+import { RAW_DATA_ARR_LEN,DEAL_IDX_TRADETIME_DATE,DEAL_IDX_DIRECTION, DEAL_IDX_ID, DEAL_IDX_PRICE, DEAL_IDX_TRADETIME, HIGHT_PRICE_IDX, LOW_PRICE_IDX } from '@/util/configs';
 //import g_ui, { UIMain } from '@/UIMain';
 import { LogicMain } from '@/logicMain';
 import g_ui from '@/UIMain';
@@ -50,13 +50,17 @@ export default class LogicMinData extends LogicBase
         //},self);
 
         self.m_mindata.addEventListener(event_key.LGACT_CURR_DATA,self.onCurrData,self);
-        g_ui.addEventListener(event_key.UI_ACT_DEAL_DATA, self.showDealData, self);
-        g_ui.addEventListener(event_key.UI_ACT_CHANGE_SHOW, self.changeShow, self);
-        g_ui.addEventListener(event_key.UI_ACT_SEL_ELE, self.onEleSelect, self);
-        g_ui.addEventListener(event_key.UI_ACT_SEL_CLEAR, (evt: Event) => {
+       
+        g_ui.addEventListener(event_key.UIACT_TURN_MBM_CHANGE_SHOW, self.changeMbmShow, self);
+        g_ui.addEventListener(event_key.UIACT_TURN_MBM_DATE_SELECT, self.changeMbmShowDate, self);
+        
+        g_ui.addEventListener(event_key.UIACT_DEAL_DATA, self.showDealData, self);
+        g_ui.addEventListener(event_key.UIACT_CHANGE_SHOW, self.changeShow, self);
+        g_ui.addEventListener(event_key.UIACT_SEL_ELE, self.onEleSelect, self);
+        g_ui.addEventListener(event_key.UIACT_SEL_CLEAR, (evt: Event) => {
             self.clearSelect();
         },self);
-        g_ui.addEventListener(event_key.UI_ACT_SEL_ELES, (evt: Event) => {
+        g_ui.addEventListener(event_key.UIACT_SEL_ELES, (evt: Event) => {
             let self = this;
             let eles = evt.data;
             if (eles.length >= 2)
@@ -109,7 +113,7 @@ export default class LogicMinData extends LogicBase
         //    }
         //}, self);
         //---------------------------------
-        g_ui.addEventListener(event_key.UI_ACT_TURN_MARKLINE_LABEL, (evt: Event) => {
+        g_ui.addEventListener(event_key.UIACT_TURN_MARKLINE_LABEL, (evt: Event) => {
             if (self._showMarkLineValue == self.SHOW_DISTANCE)
             {
                 self._showMarkLineValue = self.SHOW_MAX_DIFF_PRICE;
@@ -205,6 +209,40 @@ export default class LogicMinData extends LogicBase
         self.refresh();
     }
 
+    private changeMbmShow(d:any)
+    {
+        let self = this;
+        if (!self._mbmFlag)
+        {
+            return;
+        }
+        self._mbmDayFlag = !self._mbmDayFlag;
+        //if (!self._mbmDayFlag)
+        //{
+        //    self._mbm_show_date = null;
+        //}
+        self.refresh();
+    }
+
+    private _mbmDayFlag:boolean = true;
+    private _mbm_show_date:Date = null;
+    private changeMbmShowDate(evt:Event)
+    {
+        let self = this;
+        let d = evt.data;
+        if (!self._mbmFlag)
+        {
+            return;
+        }
+        if (self._mbm_show_date && self._mbm_show_date.getTime() == d.getTime())
+        {
+            return;
+        }
+        self._mbm_show_date = d;
+        self.refresh();
+    }
+
+
     private _dealData:any[] = [];
     private async showDealData(d:any)
     {
@@ -230,12 +268,13 @@ export default class LogicMinData extends LogicBase
             timestr +=  n[DEAL_IDX_TRADETIME_DATE].substr(4,2); 
             timestr +=  "-";
             timestr +=  n[DEAL_IDX_TRADETIME_DATE].substr(6,2); 
-            timestr +=  "T";
+            timestr +=  " ";
             self._dealData.push(
                 {
                     InstrumentID: n[DEAL_IDX_ID]// 合约代码
                     , Price: n[DEAL_IDX_PRICE] //成交价格
-                    , TradeTime: timestr + n[DEAL_IDX_TRADETIME] +"+08:00" //时间 
+                    //, TradeTime: timestr + n[DEAL_IDX_TRADETIME] +"+08:00" //时间 
+                    , TradeTime: timestr + n[DEAL_IDX_TRADETIME] //时间 
                     , Direction: n[DEAL_IDX_DIRECTION]//买卖方向
                     , CombOffsetFlag: 0 //开平标记
                 }
@@ -254,11 +293,28 @@ export default class LogicMinData extends LogicBase
 
     private fmtShowData(d:any)
     {
+        //private _mbmDayFlag:boolean = true;
+        //private _mbm_show_date:Date = null;
         let self = this;
-        return self._mbmFlag ? 
-            self.getOptionMBMData(d) : self.getOptionKData(d);
-        
+        if (!self._mbmFlag)
+        {
+            return self.getOptionKData(d);
+        }
+
+        if ( !self._mbmDayFlag)
+        {
+            return self.getOptionMBMData(d,null); 
+        }
+        //byday
+
+        if (self._mbm_show_date)
+        {
+            return self.getOptionMBMData(d,self._mbm_show_date);
+        }
+
+        return self.getOptionMBMData(d,new Date());
     }
+
     private getOptionKData(showdata:any)
     {
         let self = this;
@@ -285,7 +341,7 @@ export default class LogicMinData extends LogicBase
         console.log("logicmindata getdata!");
         return opdata;
     }
-    private getOptionMBMData(showdata:any)
+    private getOptionMBMData(showdata:any, d:Date = null)
     {
         let self = this;
         if (self._h_fmt)
@@ -296,11 +352,70 @@ export default class LogicMinData extends LogicBase
             self._h_fmt = new H_fmt_echarts();
         }
         let fmt_data = showdata.datafmt;
+        let categoryData =  fmt_data.categoryData;
+        let linevalues =  fmt_data.linevalues;
+        let dataraw = showdata.dataraw;
+        let lineMarkpoints = showdata.lineMarkpoints; 
+        if (linevalues.length <= 0)
+        {
+            return {};
+        }
+
+        if (d)
+        {
+            let dtamp = d ? d : new Date();
+            let tm= (new Date(dtamp.setHours(0, 0, 0, 0))).getTime(); //获取当天零点的时间
+            let tmed= (new Date(dtamp.setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1)).getTime(); //获取当天23:59:59的时间
+            let endidx = -1;
+            let stidx = -1;
+            for (let i=dataraw.length-1;i>=0;i--)
+            {
+                let v = dataraw[i];
+                if (endidx < 0 && v[RAW_DATA_ARR_LEN] < tmed )
+                {
+                   endidx = i;
+                }
+                else if (stidx < 0 && v[RAW_DATA_ARR_LEN] < tm)
+                {
+                    stidx = i+1;
+                }
+                if (endidx>= 0 && stidx >=0)
+                {
+                    break;
+                }
+            }
+
+            if (stidx < 0)
+            {
+                stidx = 0;
+            }
+            if (endidx < 0)
+            {
+                endidx = linevalues.length -1;
+            }
+            categoryData =  categoryData.slice(stidx,endidx+1);
+            linevalues =  linevalues.slice(stidx,endidx+1);
+
+            let ary = [];
+            for (let i=0;i<lineMarkpoints.length;i++)
+            {
+                let v = lineMarkpoints[i];
+                if (v.idx > endidx || v.idx <stidx)
+                {
+                    continue;
+                }
+                ary.push(v);
+            }
+            lineMarkpoints = ary;
+        }
+
+
+
         let opdata = self._h_fmt 
             .setTitle("data_mbm")
             .setToolBox(false) 
-            .setCategoryData(fmt_data.categoryData)
-            .setValuesAddLine(fmt_data.linevalues,{name:"mbm",dataraw:showdata.dataraw,markpoints:showdata.lineMarkpoints})
+            .setCategoryData(categoryData)
+            .setValuesAddLine(linevalues,{name:"mbm",dataraw:showdata.dataraw,markpoints:lineMarkpoints})
             .getOptions();
 
         console.log("logicmindata getdata!");
@@ -368,25 +483,25 @@ export default class LogicMinData extends LogicBase
         let pts = self._points;
         switch (evtkey)
         {
-            case event_key.UI_ACT_ADD_POINT:
+            case event_key.UIACT_ADD_POINT:
                 if (pts.length>0)
                 {
                     self.addPoint(pts[0].idx); // idx
                 }
             break;
-            case event_key.UI_ACT_DEL_POINT:
+            case event_key.UIACT_DEL_POINT:
                 if (pts.length>0)
                 {
                     self.delPoint(pts[0].idx); // idx
                 }
             break;
-            case event_key.UI_ACT_ADD_LINE:
+            case event_key.UIACT_ADD_LINE:
                 if (pts.length>1)
                 {
                     self.addLine(pts); // 
                 }
             break;
-            case event_key.UI_ACT_DEL_LINE:
+            case event_key.UIACT_DEL_LINE:
                 if (pts.length>1)
                 {
                     self.delLine(pts); // 
@@ -395,19 +510,19 @@ export default class LogicMinData extends LogicBase
             default:
                 console.error("onToolCallback["+evtkey+"] todo");
         }
-        //g_ui.addEventListener(event_key.UI_ACT_ADD_POINT, (evt: Event) => {
+        //g_ui.addEventListener(event_key.UIACT_ADD_POINT, (evt: Event) => {
         //    let self = this;
         //    self.addPoint(evt.data.idx); // idx
         //}, self);
-        //g_ui.addEventListener(event_key.UI_ACT_DEL_POINT, (evt: Event) => {
+        //g_ui.addEventListener(event_key.UIACT_DEL_POINT, (evt: Event) => {
         //    let self = this;
         //    self.delPoint(evt.data.idx); // idx
         //}, self);
-        //g_ui.addEventListener(event_key.UI_ACT_ADD_LINE, (evt: Event) => {
+        //g_ui.addEventListener(event_key.UIACT_ADD_LINE, (evt: Event) => {
         //    let self = this;
         //    self.addLine(evt.data);
         //}, self);
-        //g_ui.addEventListener(event_key.UI_ACT_DEL_LINE, (evt: Event) => {
+        //g_ui.addEventListener(event_key.UIACT_DEL_LINE, (evt: Event) => {
         //    let self = this;
         //    self.delLine(evt.data);
         //}, self);

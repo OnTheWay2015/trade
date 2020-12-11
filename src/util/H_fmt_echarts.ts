@@ -1,4 +1,4 @@
-import { END_PRICE_IDX,LOW_PRICE_IDX  } from './configs';
+import { END_PRICE_IDX,LOW_PRICE_IDX, MARK_TIME_IDX  } from './configs';
 import event_key from './event_key';
 import { deepClone } from './utils';
 
@@ -471,7 +471,7 @@ export default class H_fmt_echarts
                 [
                     {
                         name: '',
-                        coord: [v1[0], v1[valueidx1]],
+                        coord: [v1[MARK_TIME_IDX], v1[valueidx1]],
                         symbol: 'circle',
                         lineStyle: {
                             color: color
@@ -484,7 +484,7 @@ export default class H_fmt_echarts
                         info: [mark.idx1, mark.idx2],
                     },
                     {
-                        coord: [v2[0], v2[valueidx2]],
+                        coord: [v2[MARK_TIME_IDX], v2[valueidx2]],
                         symbol: 'circle',
                         symbolSize: 5,
                     }
@@ -542,8 +542,8 @@ export default class H_fmt_echarts
                     show: false
                 },
                 symbolSize:20,
-                name: v[0] + ' 标点',
-                coord: [v[0], v[mark.valueidx]],
+                name: v[MARK_TIME_IDX] + ' 标点',
+                coord: [v[MARK_TIME_IDX], v[mark.valueidx]],
                 value: v[mark.valueidx],
                 itemStyle: 
                 {
@@ -584,8 +584,9 @@ export default class H_fmt_echarts
         //mark  {下标,标识数据块哪个属性}
         let values = []; 
         let self = this;
-        let color = "rgb( 255,100,100)";
-        let dis = 15;
+        //let color = "rgb( 255,100,100)";
+        let color = "";
+        let dis = 50;
         for (let i = 0; i < markidxs.length; i++) {
             let mark = markidxs[i];
             let v = kvalues[mark.idx];
@@ -594,11 +595,16 @@ export default class H_fmt_echarts
             {
                 rot = 180;
                 dis = -dis;
-            }
-            if(mark.COFlag== 0)
-            {
                 color = "rgb( 100,255,100)";
             }
+            else
+            {
+                color = "rgb( 255,100,100)";
+            }
+            //if(mark.COFlag== 0)
+            //{
+            //    color = "rgb( 100,255,100)";
+            //}
             values.push({
                 symbol:'arrow',
                 symbolRotate:rot,
@@ -608,9 +614,9 @@ export default class H_fmt_echarts
                     distance:dis,
                 },
                 symbolSize:20,
-                name: v[0] + ' 标点',
+                name: v[MARK_TIME_IDX] + ' 标点',
                 //coord: [v[0], v[mark.valueidx]],
-                coord: [v[0], v[END_PRICE_IDX]],
+                coord: [v[MARK_TIME_IDX], v[END_PRICE_IDX]],
                 value: 0,
                 info:mark,
                 itemStyle: 
@@ -653,7 +659,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_ADD_POINT);
+                            self.toolCallback(event_key.UIACT_ADD_POINT);
                         }
                     }
                 },
@@ -664,7 +670,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_ADD_LINE);
+                            self.toolCallback(event_key.UIACT_ADD_LINE);
                         }
                     }
                 },
@@ -675,7 +681,7 @@ export default class H_fmt_echarts
                     onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_DEL_POINT);
+                            self.toolCallback(event_key.UIACT_DEL_POINT);
                         }
                     }
                 },
@@ -686,7 +692,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_DEL_LINE);
+                            self.toolCallback(event_key.UIACT_DEL_LINE);
                         }
                     }
                 },
@@ -697,7 +703,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                            self.toolCallback(event_key.UIACT_TOOL_TODO);
                         }
                     }
                 },
@@ -708,7 +714,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                            self.toolCallback(event_key.UIACT_TOOL_TODO);
                         }
                     }
                 },
@@ -719,7 +725,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                            self.toolCallback(event_key.UIACT_TOOL_TODO);
                         }
                     }
                 },
@@ -730,7 +736,7 @@ export default class H_fmt_echarts
                     ,onclick: function (){
                         if (self.toolCallback)
                         {
-                            self.toolCallback(event_key.UI_ACT_TOOL_TODO);
+                            self.toolCallback(event_key.UIACT_TOOL_TODO);
                         }
                     }
                 }

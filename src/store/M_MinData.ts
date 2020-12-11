@@ -1,6 +1,6 @@
 import EventDispatcher from "../util/eventdispatch"
 import ax from "axios"
-import { API_MIN_DATA, API_TICK_DATA, DEAL_IDX_TRADETIME, MARK_TIME_IDX,START_PRICE_IDX,MARK_TIME_1_IDX,END_PRICE_IDX, HIGHT_PRICE_IDX, LOW_PRICE_IDX, HTTP_SERVER } from '@/util/configs';
+import { API_MIN_DATA, API_TICK_DATA, DEAL_IDX_TRADETIME,RAW_DATA_ARR_LEN, MARK_TIME_IDX,START_PRICE_IDX,END_PRICE_IDX, HIGHT_PRICE_IDX, LOW_PRICE_IDX, HTTP_SERVER } from '@/util/configs';
 import { dateFMT, paramsUrlFMT, stringToDate } from '@/util/utils';
 import { http } from '@/net/httpHandle';
 import  H_fmt_echarts  from '@/util/H_fmt_echarts';
@@ -13,6 +13,7 @@ export class M_Mindata extends EventDispatcher
     constructor() {
         super();
         this._params = {id:"",period:0};
+        setInterval(this.process.bind(this), 500);
     }
     private _params:{id:string,period:number};
     private _data:{init:boolean,d:any,datafmt:any,dataraw:any,datarawMap:any,marklines:any[],markpoints:any[],lineMarkpoints:any[]};
@@ -76,7 +77,7 @@ export class M_Mindata extends EventDispatcher
         let data = self._data.dataraw;
         if (idx<data.length)
         {
-            return data[idx][0];
+            return data[idx][MARK_TIME_IDX];
         }
         return null;
     }
@@ -146,7 +147,17 @@ export class M_Mindata extends EventDispatcher
 
         let datarawmap = {};
         let datafmt = {};
-        let arr = d.trade_list;
+        let arr; 
+        if (!d.trade_list)
+        {
+            let s = '{"trade_list":' + d.data + "}";
+            let ss = JSON.parse(s);
+            arr = ss.trade_list;
+            d.trade_list = arr;
+        }
+        else {
+            arr = d.trade_list;
+        }
         for (let i = 0; i < arr.length; i++) {
             let n: any = arr[i];//开始价格，结束价格，最高价，最低价，最大价差。新增成交量，成交金额。平均价
             //categoryData.push(n.actionday + " " + n.starttime);
@@ -158,7 +169,7 @@ export class M_Mindata extends EventDispatcher
                 , n[HIGHT_PRICE_IDX] //hight_price
                 , n[LOW_PRICE_IDX] //low_price
             ]);
-            if (n.length<=11)
+            if (n.length<=RAW_DATA_ARR_LEN)
             {
                 let de = stringToDate(n[MARK_TIME_IDX]);
                 n.push(de.getTime());
@@ -184,9 +195,10 @@ export class M_Mindata extends EventDispatcher
         };
         //let marklines:any[] = [];
         //let markpoints:any[] = [];
-        let markpoints = d.markpoints ? d.markpoints : [];
-        let marklines = d.marklines ? d.marklines : [];
-        let lineMarkpoints = d.lineMarkpoints? d.lineMarkpoints: [];
+        let olddata:any = self._data ? self._data : {};
+        let markpoints = olddata.markpoints ? olddata.markpoints : [];
+        let marklines = olddata.marklines ? olddata.marklines : [];
+        let lineMarkpoints = olddata.lineMarkpoints? olddata.lineMarkpoints: [];
         //let markpoints = [
         ////mark  {下标,标识数据块哪个属性}                
         //   //{idx:5, valueidx:1} ,
@@ -245,10 +257,9 @@ export class M_Mindata extends EventDispatcher
             for (; j >=0; j--) 
             {
                 let v = trade_list[j];
-                let comptime= v[MARK_TIME_1_IDX] +timeseg;
-                if (addtm <= comptime)
+                let comptime= v[RAW_DATA_ARR_LEN] ;
+                if (addtm >= comptime)
                 {
-                    j++;
                     if (marks.length <= 0) {                            
                         marks.push({
                             timemark:addtm,
@@ -281,16 +292,10 @@ export class M_Mindata extends EventDispatcher
                 } 
                 else
                 {
-                    endflag = true;                        
-                    break;
+                    continue;
                 }                    
 
             }
-            if (endflag)
-            {
-                break;
-            }
-
         }
         let markstmp = [];
         markstmp.push({
@@ -327,15 +332,13 @@ export class M_Mindata extends EventDispatcher
         if (!trade_list ||trade_list.length<=0)
         {
            trade_list.push([
-            dateFMT(de,"yy-MM-ddThh:mm:ss+08:00")
+            id,
+            //dateFMT(de,"yy-MM-ddThh:mm:ss+08:00")
+            dateFMT(de,"yy-MM-dd hh:mm:ss")
             ,dataArr[1]
             ,dataArr[2]
             ,dataArr[3]
             ,dataArr[4]
-            ,0
-            ,0
-            ,0
-            ,0
             ,0
             ,0
            ]);
@@ -346,13 +349,13 @@ export class M_Mindata extends EventDispatcher
         else {
             let last = trade_list[trade_list.length - 1];
             let timeseg = 60 * self._params.period;
-            let lasttm = last[MARK_TIME_1_IDX];
+            let lasttm = last[RAW_DATA_ARR_LEN];
             let addtm = de.getTime();
             let newtm = lasttm + timeseg;
-            if (newtm <= addtm) {
-                if (last[START_PRICE_IDX] != dataArr[1] &&
-                    last[END_PRICE_IDX] != dataArr[2] &&
-                    last[HIGHT_PRICE_IDX] != dataArr[3] &&
+            if (addtm <= newtm  ) {
+                if (last[START_PRICE_IDX] != dataArr[1] || 
+                    last[END_PRICE_IDX] != dataArr[2] || 
+                    last[HIGHT_PRICE_IDX] != dataArr[3]|| 
                     last[LOW_PRICE_IDX] != dataArr[4]) {
             
                         last[START_PRICE_IDX] = dataArr[1];
@@ -370,20 +373,19 @@ export class M_Mindata extends EventDispatcher
                 }
             }
             else {
-                let detmp = new Date(newtm);
+                addtm = addtm - addtm%timeseg;
+                let detmp = new Date(addtm);
                 let add = [
-                    dateFMT(detmp, "yy-MM-ddThh:mm:ss+08:00")
+                    id,
+                    //dateFMT(detmp, "yy-MM-ddThh:mm:ss+08:00")
+                    dateFMT(detmp, "yy-MM-dd hh:mm:ss")
                     , dataArr[1]
                     , dataArr[2]
                     , dataArr[3]
                     , dataArr[4]
                     , 0
                     , 0
-                    , 0
-                    , 0
-                    , 0
-                    , 0
-                    , newtm
+                    , addtm
                 ];
                 trade_list.push(add);
                 chg = true;
@@ -395,10 +397,19 @@ export class M_Mindata extends EventDispatcher
         if (chg)
         {
             self.formatData(self._data.d);
-            self.dispatch(event_key.LGACT_CURR_DATA, null);
+            self._addDataFlag = true;
         }
-    }
 
+    }
+    private _addDataFlag:boolean = false;
+    private process(tm: number) {
+        let self = this;
+        if (!self._addDataFlag) {
+            return;
+        }
+        self._addDataFlag = false;
+        self.dispatch(event_key.LGACT_CURR_DATA, null);
+    }
         //self._params.period = timeCount;
         //self._params.id= id;
     

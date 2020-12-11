@@ -139,8 +139,8 @@ export default class k_show extends Vue {
 	  //if(params.componentType!="series"){
     //   return;
     // }
-    //g_ui.dispatch(event_key.UI_ACT_SEL_ELE,params.value[0]); 
-    g_ui.dispatch(event_key.UI_ACT_SEL_ELE,params); 
+    //g_ui.dispatch(event_key.UIACT_SEL_ELE,params.value[0]); 
+    g_ui.dispatch(event_key.UIACT_SEL_ELE,params); 
 
   }
 
@@ -159,7 +159,7 @@ export default class k_show extends Vue {
      {
        sels.push(dataIndices[0]);
      }
-     g_ui.dispatch(event_key.UI_ACT_SEL_ELES,sels); 
+     g_ui.dispatch(event_key.UIACT_SEL_ELES,sels); 
   }
 }
 

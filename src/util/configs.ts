@@ -21,12 +21,13 @@ export const ACT_WS_URL = "/ws_notice";// contract_id, period,
 
 
 //----------
-export const MARK_TIME_IDX= 0;
-export const START_PRICE_IDX = 1;
-export const END_PRICE_IDX = 2;
-export const HIGHT_PRICE_IDX = 3;
-export const LOW_PRICE_IDX = 4;
-export const MARK_TIME_1_IDX= 11;
+export const MARK_TIME_IDX= 1;
+export const START_PRICE_IDX = 2;
+export const END_PRICE_IDX = 3;
+export const HIGHT_PRICE_IDX = 4;
+export const LOW_PRICE_IDX = 5;
+
+export const RAW_DATA_ARR_LEN= 8;
 //----------
 
 export const TIME_UNIT_MIN:number= 1;
